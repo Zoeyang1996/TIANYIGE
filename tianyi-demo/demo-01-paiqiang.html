@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>序 · 牌墙 ｜ 天一阁 · 数智幻境</title>
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+/* ---------- 首屏舞台 ---------- */
+.stage{position:relative;height:100vh;min-height:620px;overflow:hidden;display:grid;place-items:center}
+.wall-wrap{position:absolute;inset:-8% -5%;perspective:1200px}
+.wall{
+  position:absolute;inset:0;display:grid;
+  grid-template-columns:repeat(16,1fr);grid-template-rows:repeat(9,1fr);
+  gap:7px;padding:20px;
+  transform:translate3d(0,0,0);will-change:transform;
+  transition:transform .7s var(--ease);
+  opacity:.58;filter:saturate(.78) contrast(.96);
+}
+.w-tile{
+  position:relative;border:0;padding:0;cursor:pointer;
+  background:linear-gradient(152deg,#F8F0E2 0%,#EFE3CF 52%,#DCCBB0 100%);
+  border-radius:3px;
+  box-shadow:0 1px 1px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 3px rgba(120,100,72,.22);
+  display:grid;place-items:center;overflow:hidden;
+  transform:rotate(var(--rot,0deg));
+  transition:transform .4s var(--ease),opacity .4s,filter .4s,box-shadow .4s;
+  animation:tileIn .8s var(--ease) backwards;
+}
+@keyframes tileIn{from{opacity:0;transform:translateY(18px) scale(.94)}to{opacity:1;transform:rotate(var(--rot,0deg))}}
+.w-tile svg{width:76%;height:84%}
+.w-tile::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(200deg,rgba(255,255,255,.5),transparent 42%);
+  opacity:.5;pointer-events:none;
+}
+.w-tile:hover{transform:translateY(-7px) scale(1.07) rotate(var(--rot,0deg));z-index:6;box-shadow:0 16px 26px -10px rgba(0,0,0,.75)}
+.w-tile.dim{opacity:.10;filter:blur(1.2px) saturate(.4);transform:scale(.93) rotate(var(--rot,0deg))}
+.w-tile.sel{outline:2px solid var(--red-l);outline-offset:2px}
+
+/* 压暗 + 中心聚光，保证文字压得住 */
+.stage-veil{
+  position:absolute;inset:0;pointer-events:none;
+  background-color:rgba(15,24,21,.34);
+  background-image:
+    radial-gradient(54% 50% at 50% 50%, rgba(14,22,19,.98) 0%, rgba(14,22,19,.95) 38%, rgba(14,22,19,.82) 58%, rgba(14,22,19,.34) 82%, rgba(14,22,19,0) 100%),
+    linear-gradient(180deg, rgba(15,24,21,.94) 0%, rgba(15,24,21,.40) 15%, rgba(15,24,21,0) 34%, rgba(15,24,21,0) 62%, rgba(15,24,21,.96) 100%);
+}
+.stage-copy{position:relative;z-index:3;text-align:center;padding:0 24px;max-width:900px}
+.stage-copy::before{
+  content:"";position:absolute;inset:-80px -100px;z-index:-1;pointer-events:none;
+  background:radial-gradient(58% 54% at 50% 50%, rgba(14,22,19,.95) 0%, rgba(14,22,19,.78) 60%, rgba(14,22,19,0) 84%);
+  filter:blur(12px);
+}
+.stage-copy .eyebrow{justify-content:center}
+.stage-copy .eyebrow::before{display:none}
+.stage-copy .lead{margin:22px auto 32px;text-align:center;max-width:50ch}
+.stage-copy .h1{text-shadow:0 4px 40px rgba(0,0,0,.55)}
+.acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.stage-foot{
+  position:absolute;bottom:0;left:0;right:0;z-index:4;
+  background:linear-gradient(0deg,rgba(12,20,17,.94) 12%,rgba(12,20,17,.55) 62%,transparent 100%);
+  padding-top:34px;padding-bottom:22px;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:0 34px;font-size:11.5px;letter-spacing:.16em;color:var(--ivory-3);
+}
+.scroll-hint{display:flex;align-items:center;gap:8px}
+.scroll-hint i{display:block;width:1px;height:26px;background:linear-gradient(var(--ivory-3),transparent);animation:pulseGlow 2.6s infinite}
+
+/* 筛选 */
+.filters{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.filters .lb{font-size:11px;letter-spacing:.14em;color:var(--ivory-3);margin-right:2px}
+
+/* 详情面板 */
+.panel{
+  position:fixed;top:58px;right:0;bottom:0;width:360px;max-width:88vw;z-index:70;
+  background:rgba(18,28,24,.96);backdrop-filter:blur(18px);
+  border-left:1px solid var(--line);
+  transform:translateX(102%);transition:transform .55s var(--ease);
+  display:flex;flex-direction:column;padding:26px 26px 22px;
+}
+.panel.open{transform:none}
+.panel-x{position:absolute;top:16px;right:16px;background:none;border:1px solid var(--line);width:28px;height:28px;border-radius:50%;color:var(--ivory-2);font-size:15px;line-height:1}
+.panel-x:hover{border-color:var(--ivory-3);color:var(--ivory)}
+.p-thumb{
+  width:112px;height:150px;margin:6px 0 20px;border-radius:5px;
+  background:linear-gradient(152deg,#F8F0E2,#EFE3CF 52%,#DCCBB0);
+  display:grid;place-items:center;box-shadow:0 14px 30px -12px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.7);
+}
+.p-thumb svg{width:80%;height:84%}
+.p-suit{font-size:11px;letter-spacing:.22em;color:var(--gold)}
+.p-name{font-family:var(--serif);font-size:30px;margin:6px 0 14px;letter-spacing:.06em}
+.p-note{font-size:13.5px;color:var(--ivory-2);line-height:1.92;margin:0 0 16px}
+.p-src{font-size:11.5px;color:var(--ivory-3);border-top:1px solid var(--line);padding-top:14px;margin-top:auto;line-height:1.8}
+
+/* ---------- 章节 ---------- */
+.chap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.chap{
+  display:block;position:relative;padding:26px 24px 24px;border:1px solid var(--line);
+  background:linear-gradient(170deg,rgba(243,234,218,.05),transparent 70%);
+  transition:.45s var(--ease);overflow:hidden;
+}
+.chap::before{
+  content:"";position:absolute;left:0;top:0;width:2px;height:0;background:var(--red-l);
+  transition:height .5s var(--ease);
+}
+.chap:hover{border-color:rgba(243,234,218,.28);transform:translateY(-3px);background:linear-gradient(170deg,rgba(243,234,218,.09),transparent 70%)}
+.chap:hover::before{height:100%}
+.chap-no{font-family:var(--serif);font-size:12px;letter-spacing:.2em;color:var(--gold)}
+.chap-t{font-family:var(--serif);font-size:23px;margin:12px 0 8px;letter-spacing:.06em}
+.chap-d{font-size:12.8px;color:var(--ivory-2);line-height:1.8;margin:0 0 18px;min-height:3.4em}
+.chap-f{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--ivory-3)}
+.chap-f .go{color:var(--red-l);letter-spacing:.1em}
+
+@media(max-width:960px){
+  .wall{grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(12,1fr);gap:5px}
+  .wall .w-tile:nth-child(n+145){display:none}
+  .chap-grid{grid-template-columns:1fr 1fr}
+  .stage-foot .filters{display:none}
+}
+@media(max-width:620px){
+  .chap-grid{grid-template-columns:1fr}
+  .stage-copy .h1{font-size:34px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">天</span><span>天一阁 · 数智幻境</span></a>
+  <nav class="topnav">
+    <a href="demo-01-paiqiang.html">序·牌墙</a>
+    <a href="demo-02-paimian.html">解·牌面</a>
+    <a href="demo-03-zhibianzhu.html">定·纸变竹</a>
+    <a href="demo-04-hangxian.html">传·航线</a>
+    <a href="demo-05-wodepaimian.html">续·我的牌面</a>
+    <a href="demo-06-shucang.html">藏·索引</a>
+    <a href="demo-07-dashboard.html">观·看板</a>
+  </nav>
+  <a class="back" href="index.html">总览 ↗</a>
+</header>
+
+<main>
+<!-- ========== 首屏 ========== -->
+<section class="stage" id="stage">
+  <div class="wall-wrap"><div class="wall" id="wall" aria-hidden="true"></div></div>
+  <div class="stage-veil"></div>
+
+  <div class="stage-copy">
+    <div class="eyebrow"><span class="zh">序 · PREFACE</span></div>
+    <h1 class="h1">一副牌的起点，<br>在宁波。</h1>
+    <p class="lead">一百四十四张牌摊开在这里。它们不是被谁发明出来的，<br>是被一条江、一座港口、一群人，慢慢磨出来的。</p>
+    <div class="acts">
+      <a class="btn" href="#chapters">进入六章 <span style="opacity:.6">↓</span></a>
+      <a class="btn btn-line" href="demo-02-paimian.html">直接看「牌面密码」</a>
+    </div>
+  </div>
+
+  <div class="stage-foot">
+    <div class="filters" id="filters">
+      <span class="lb">按花色看</span>
+      <button class="chip on" data-f="all"><span class="dot"></span>全副 144</button>
+      <button class="chip" data-f="wan">萬 36</button>
+      <button class="chip" data-f="suo">索 36</button>
+      <button class="chip" data-f="tong">筒 36</button>
+      <button class="chip" data-f="word">字 28</button>
+      <button class="chip" data-f="flower">花 8</button>
+    </div>
+    <div class="scroll-hint"><i></i><span>滚动 · 或点任意一张牌</span></div>
+  </div>
+</section>
+
+<!-- ========== 六章 ========== -->
+<section class="sec" id="chapters">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span>CHAPTERS</span><span class="zh">六个章节 · 六个可跑的 demo</span></div>
+      <h2 class="sec-title"><span class="num">01—06</span>叙事的骨架，也是交付的清单</h2>
+      <p class="sec-lead">每一章只解决一个问题，并且对应一个可以独立打开、独立演示的页面。评审时可以顺着讲一遍，也可以单点跳进去深挖。</p>
+    </div>
+
+    <div class="chap-grid">
+      <a class="chap reveal" href="index.html#matrix" data-d="0">
+        <div class="chap-no">第一章 · 源</div>
+        <h3 class="chap-t">博戏千年</h3>
+        <p class="chap-d">从六博、叶子戏到马吊，用馆方三块源流图做一张可展开的谱系。麻将不是一天长成的。</p>
+        <div class="chap-f"><span class="tag gold">文案已备 · 交互待建</span><span class="go">见计划 →</span></div>
+      </a>
+
+      <a class="chap reveal" href="demo-02-paimian.html" data-d="1">
+        <div class="chap-no">第三章 · 解</div>
+        <h3 class="chap-t">牌面密码</h3>
+        <p class="chap-d">筒是木桶，索是缆绳，万是钱数，风是风向。点开一张牌，看见它来自船上的什么。</p>
+        <div class="chap-f"><span class="tag green">已可运行</span><span class="go">打开 →</span></div>
+      </a>
+
+      <a class="chap reveal" href="demo-03-zhibianzhu.html" data-d="2">
+        <div class="chap-no">第二章 · 定</div>
+        <h3 class="chap-t">纸变竹</h3>
+        <p class="chap-d">同治三年，陈鱼门把纸牌改成竹骨。一次三秒的材质翻转，胜过三百字说明。</p>
+        <div class="chap-f"><span class="tag green">已可运行</span><span class="go">打开 →</span></div>
+      </a>
+
+      <a class="chap reveal" href="demo-04-hangxian.html" data-d="0">
+        <div class="chap-no">第四章 · 传</div>
+        <h3 class="chap-t">寰宇四方</h3>
+        <p class="chap-d">从宁波港出发的三条航线：东渡日本、西行欧美、南下南洋。每一站都换了一副牌。</p>
+        <div class="chap-f"><span class="tag green">已可运行</span><span class="go">打开 →</span></div>
+      </a>
+
+      <a class="chap reveal" href="demo-06-shucang.html" data-d="1">
+        <div class="chap-no">数据孪生 · 藏</div>
+        <h3 class="chap-t">三级索引</h3>
+        <p class="chap-d">场景 → 书柜 → 书册，三级编号与坐标绑定。点一本书，调出档案，再反查它在架上的位置。</p>
+        <div class="chap-f"><span class="tag green">已可运行</span><span class="go">打开 →</span></div>
+      </a>
+
+      <a class="chap reveal" href="demo-05-wodepaimian.html" data-d="2">
+        <div class="chap-no">尾章 · 续</div>
+        <h3 class="chap-t">我的牌面</h3>
+        <p class="chap-d">选一张字牌、一种材质、一句方言，生成一张带编号的牌面卡，可下载、可分享。</p>
+        <div class="chap-f"><span class="tag green">已可运行</span><span class="go">打开 →</span></div>
+      </a>
+    </div>
+
+    <div class="hr" style="margin:52px 0 34px"></div>
+
+    <div class="grid g3">
+      <div class="reveal">
+        <div class="stat-n">144<em>张</em></div>
+        <div class="stat-k">136 张基本牌 + 8 张花牌</div>
+      </div>
+      <div class="reveal" data-d="1">
+        <div class="stat-n">5<em>个</em></div>
+        <div class="stat-k">核心交互模块 · 已全部可跑</div>
+      </div>
+      <div class="reveal" data-d="2">
+        <div class="stat-n">18<em>天</em></div>
+        <div class="stat-k">内容交付周期 · 3 天缓冲进训练</div>
+      </div>
+    </div>
+
+    <p style="margin-top:38px;font-size:12.5px;color:var(--ivory-3);max-width:70ch" class="reveal">
+      说明：本页牌面全部由 SVG 程序绘制，不依赖任何图片与网络请求，断网也能演示；音效为 Web Audio 实时合成，方言读音暂用系统语音占位，真人录音已列入素材清单。
+    </p>
+  </div>
+</section>
+</main>
+
+<div class="panel" id="panel" aria-hidden="true">
+  <button class="panel-x" id="panelX" aria-label="关闭">✕</button>
+  <div class="p-suit" id="pSuit">筒子 · TONG</div>
+  <div class="p-thumb" id="pThumb"></div>
+  <div class="p-name" id="pName">一筒</div>
+  <p class="p-note" id="pNote"></p>
+  <div class="p-src" id="pSrc"></div>
+</div>
+
+<script src="assets/store.js"></script>
+<script src="assets/tiles.js"></script>
+<script>
+(function(){
+  var SUIT_CN = { wan:'萬子 · WAN', suo:'索子 · SUO', tong:'筒子 · TONG', wind:'风牌 · WIND', dragon:'箭牌 · DRAGON', flower:'花牌 · FLOWER' };
+  var NOTE = {
+    wan:'船家对财富的计量与渴望。「萬」是计价单位，一萬至九萬，每色四张，共三十六张。牌面上是汉字数字与「萬」的双轨记数，也是中国传统记数法最直白的一次图形化。',
+    suo:'船上的缆绳、渔网与升帆的绳索。特别注意「一条」——在馆藏的一副牌里，它不是竖条，而是一只完整的鸟：牌名「麻雀」、方言读音、图像，三者在那一张牌上重合了。',
+    tong:'海船上盛水盛粮的木桶。中庭地砖旁的铭文原文：「筒子牌，也俗称饼子，源于海船上盛水盛粮的桶。牌面一至九，每色四张，共三十六张。」这是全站最简洁、也最权威的一句文案。',
+    wind:'帆船时代对风向的依赖，出海观风而定行止。东、南、西、北各四张，共十六张。风位也决定了牌桌上的座次与门风。',
+    dragon:'红中、绿发、白板，合称「三箭」，各四张共十二张。它们由碰和牌里的红花、白花、老千改称而来——改的是名字，留下的是颜色。',
+    flower:'春、夏、秋、冬与梅、兰、竹、菊，共八张，为后人所增。实拍还见到「福、禄、寿、贵」的地方变体：花牌系统在传播中一直被替换，这正是「麻将每走一步就变一次样」的证据。'
+  };
+
+  var wall = document.getElementById('wall');
+  var deck = Tiles.deck();
+  var frag = document.createDocumentFragment();
+
+  deck.forEach(function(t, i){
+    var b = document.createElement('button');
+    b.className = 'w-tile';
+    b.type = 'button';
+    b.dataset.suit = (t.suit === 'wind' || t.suit === 'dragon') ? 'word' : t.suit;
+    b.dataset.i = i;
+    b.style.animationDelay = (((i % 16) + Math.floor(i / 16)) / 24 * 0.55).toFixed(2) + 's';
+    b.style.setProperty('--rot', ((Math.random() - 0.5) * 1.6).toFixed(2) + 'deg');
+    b.innerHTML = Tiles.svg(t);
+    b.setAttribute('aria-label', Tiles.name(t));
+    frag.appendChild(b);
+  });
+  wall.appendChild(frag);
+
+  /* ---------- 视差 ---------- */
+  var stage = document.getElementById('stage');
+  var tx = 0, ty = 0, cx = 0, cy = 0;
+  stage.addEventListener('mousemove', function(e){
+    var r = stage.getBoundingClientRect();
+    tx = ((e.clientX - r.left) / r.width - .5) * -26;
+    ty = ((e.clientY - r.top) / r.height - .5) * -18;
+  });
+  stage.addEventListener('mouseleave', function(){ tx = 0; ty = 0; });
+  (function loop(){
+    cx += (tx - cx) * .06; cy += (ty - cy) * .06;
+    var sy = Math.min(window.scrollY, stage.offsetHeight);
+    wall.style.transform = 'translate3d(' + cx.toFixed(2) + 'px,' + (cy - sy * .18).toFixed(2) + 'px,0) scale(' + (1 + sy / 6000) + ')';
+    requestAnimationFrame(loop);
+  })();
+
+  /* ---------- 筛选 ---------- */
+  var filters = document.getElementById('filters');
+  filters.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-f]'); if(!btn) return;
+    filters.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
+    btn.classList.add('on');
+    var f = btn.dataset.f;
+    wall.querySelectorAll('.w-tile').forEach(function(t){
+      var hit = (f === 'all') || (t.dataset.suit === f);
+      t.classList.toggle('dim', !hit);
+    });
+    TY.track('序·牌墙', '筛选花色', { f: f });
+  });
+
+  /* ---------- 详情面板 ---------- */
+  var panel = document.getElementById('panel');
+  function openTile(t, el){
+    document.getElementById('pSuit').textContent = SUIT_CN[t.suit] || '';
+    document.getElementById('pThumb').innerHTML = Tiles.svg(t);
+    document.getElementById('pName').textContent = Tiles.name(t);
+    document.getElementById('pNote').textContent = NOTE[t.suit] || '';
+    document.getElementById('pSrc').innerHTML = '来源 · 天一阁麻将起源地陈列馆展板与中庭地砖铭文<br>对应章节 · ' +
+      (t.suit === 'wan' || t.suit === 'suo' || t.suit === 'tong' ? '第三章「解 · 牌面密码」' : '第四章「传 · 寰宇四方」');
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden','false');
+    wall.querySelectorAll('.w-tile.sel').forEach(function(x){ x.classList.remove('sel'); });
+    if(el) el.classList.add('sel');
+    TY.track('序·牌墙', '点击牌面', { tile: Tiles.short(t), suit: t.suit });
+  }
+  wall.addEventListener('click', function(e){
+    var b = e.target.closest('.w-tile'); if(!b) return;
+    openTile(deck[+b.dataset.i], b);
+  });
+  document.getElementById('panelX').onclick = function(){
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden','true');
+    wall.querySelectorAll('.w-tile.sel').forEach(function(x){ x.classList.remove('sel'); });
+  };
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') document.getElementById('panelX').click(); });
+
+  TY.track('序·牌墙', '进入页面');
+})();
+</script>
+</body>
+</html>

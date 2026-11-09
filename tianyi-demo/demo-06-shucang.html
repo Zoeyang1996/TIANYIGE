@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>藏 · 三级索引 ｜ 天一阁 · 数智幻境</title>
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+.hero{padding:132px 0 24px}
+.hero .h1{font-size:clamp(30px,4vw,46px);max-width:24ch}
+.hero .lead{margin-top:18px}
+.hero .tag{margin-left:10px;vertical-align:3px;display:inline-block;white-space:nowrap}
+
+.sys{display:grid;grid-template-columns:1.12fr .88fr;gap:46px;align-items:start;margin-top:6px}
+.shelf-col{position:sticky;top:82px}
+
+/* 柜 tab */
+.cabs{display:flex;gap:6px;margin-bottom:14px}
+.cab-tab{
+  flex:1;text-align:left;background:none;border:1px solid var(--line);border-radius:2px;
+  padding:10px 13px;transition:.25s;color:var(--ivory-2);
+}
+.cab-tab:hover{border-color:rgba(243,234,218,.3)}
+.cab-tab.on{border-color:rgba(196,87,63,.55);background:rgba(161,58,44,.12);color:var(--ivory)}
+.cab-tab b{display:block;font-family:var(--serif);font-size:15px;font-weight:500;letter-spacing:.06em}
+.cab-tab span{font-size:10.5px;color:var(--ivory-3);letter-spacing:.06em}
+
+/* 书柜 */
+.shelfbox{
+  border:1px solid var(--line);border-radius:3px;padding:18px 18px 22px;
+  background:
+    linear-gradient(180deg,rgba(243,234,218,.035),transparent),
+    repeating-linear-gradient(90deg,rgba(243,234,218,.012) 0 1px,transparent 1px 26px);
+  position:relative;
+}
+.shelf-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:11px;letter-spacing:.14em;color:var(--ivory-3)}
+.shelf{
+  position:relative;display:flex;align-items:flex-end;gap:5px;padding:0 6px 7px;min-height:118px;
+  border-bottom:2px solid rgba(154,125,74,.28);
+  margin-bottom:12px;transition:background .4s;
+}
+.shelf::after{
+  content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(154,125,74,.5),transparent);opacity:0;transition:opacity .4s;
+}
+.shelf.hl{background:rgba(196,87,63,.09)}
+.shelf.hl::after{opacity:1}
+.shelf-no{position:absolute;left:-2px;top:0;font-size:9.5px;color:var(--ivory-3);letter-spacing:.1em}
+.spine{
+  position:relative;border:0;padding:0;cursor:pointer;border-radius:2px 2px 0 0;
+  display:grid;place-items:center;transition:transform .28s var(--ease),box-shadow .28s,filter .28s;
+  box-shadow:inset -1px 0 0 rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.18);
+  writing-mode:vertical-rl;text-orientation:upright;
+  font-family:var(--serif);font-size:11px;letter-spacing:.12em;
+  color:rgba(243,234,218,.88);padding-top:8px;overflow:hidden;
+}
+.spine:hover{transform:translateY(-9px);box-shadow:0 12px 20px -8px rgba(0,0,0,.8)}
+.spine.on{box-shadow:0 0 0 2px var(--red-l), 0 14px 24px -10px rgba(0,0,0,.8);transform:translateY(-9px)}
+.spine.gap{background:none!important;box-shadow:none;cursor:default;pointer-events:none}
+.spine.digit::after{
+  content:"";position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:#8FBBA1;
+}
+.scanline{
+  position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#C4573F,transparent);
+  opacity:0;pointer-events:none;box-shadow:0 0 18px 4px rgba(196,87,63,.5);
+}
+.scanline.run{animation:scan 1.15s var(--ease) forwards}
+@keyframes scan{0%{opacity:0;top:0}20%{opacity:1}100%{opacity:0;top:100%}}
+
+/* 搜索 */
+.searchbar{display:flex;gap:8px;margin-bottom:12px}
+.searchbar input{
+  flex:1;background:rgba(15,24,21,.55);border:1px solid var(--line);border-radius:2px;
+  color:var(--ivory);padding:9px 13px;font-size:13px;outline:none;transition:.25s;font-family:var(--sans);
+}
+.searchbar input:focus{border-color:rgba(196,87,63,.5)}
+.searchbar input::placeholder{color:var(--ivory-3)}
+.searchbar .go{border:1px solid var(--line);background:none;color:var(--ivory-2);padding:0 14px;border-radius:2px;font-size:12.5px}
+.searchbar .go:hover{border-color:var(--ivory-3);color:var(--ivory)}
+
+/* 档案卡 */
+.doc{border:1px solid var(--line);border-radius:3px;padding:28px;background:linear-gradient(170deg,rgba(243,234,218,.055),rgba(243,234,218,.014))}
+.doc-no{font-family:"SFMono-Regular",Menlo,monospace;font-size:11.5px;letter-spacing:.12em;color:var(--gold)}
+.doc-badge{float:right}
+.doc-t{font-family:var(--serif);font-size:30px;letter-spacing:.06em;margin:12px 0 10px;line-height:1.3}
+.doc-sub{font-size:12.5px;color:var(--ivory-3);letter-spacing:.06em;margin-bottom:22px}
+.meta{display:grid;grid-template-columns:74px 1fr;gap:0 14px;font-size:13px;margin-bottom:8px}
+.meta dt{color:var(--ivory-3);font-size:12px;padding:8px 0;border-top:1px solid var(--line-2)}
+.meta dd{margin:0;color:var(--ivory-2);padding:8px 0;border-top:1px solid var(--line-2)}
+.meta dd b{color:var(--ivory);font-weight:500}
+.path{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:18px 0 6px}
+.path span{font-size:11.5px;padding:4px 9px;border:1px solid var(--line);border-radius:2px;color:var(--ivory-2);transition:.3s}
+.path span.on{border-color:rgba(196,87,63,.65);background:rgba(161,58,44,.18);color:#F7E8D8}
+.path i{color:var(--ivory-3);font-style:normal;font-size:10px}
+.doc-tags{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 22px}
+.doc-acts{display:flex;gap:9px;flex-wrap:wrap;padding-top:20px;border-top:1px solid var(--line)}
+.doc-note{font-size:11px;color:var(--ivory-3);line-height:1.8;margin-top:18px}
+.counts{display:flex;gap:26px;margin-top:16px;font-size:11px;color:var(--ivory-3);letter-spacing:.08em}
+.counts b{display:block;font-family:var(--serif);font-size:21px;color:var(--ivory);font-weight:500;margin-bottom:2px}
+.empty{padding:40px 0;text-align:center;color:var(--ivory-3);font-size:13px}
+
+@media(max-width:1000px){
+  .sys{grid-template-columns:1fr;gap:30px}
+  .shelf-col{position:static}
+  .doc-t{font-size:25px}
+  .shelf{min-height:104px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">天</span><span>天一阁 · 数智幻境</span></a>
+  <nav class="topnav">
+    <a href="demo-01-paiqiang.html">序·牌墙</a>
+    <a href="demo-02-paimian.html">解·牌面</a>
+    <a href="demo-03-zhibianzhu.html">定·纸变竹</a>
+    <a href="demo-04-hangxian.html">传·航线</a>
+    <a href="demo-05-wodepaimian.html">续·我的牌面</a>
+    <a href="demo-06-shucang.html">藏·索引</a>
+    <a href="demo-07-dashboard.html">观·看板</a>
+  </nav>
+  <a class="back" href="index.html">总览 ↗</a>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span>DATA TWIN</span><span class="zh">藏 · 三级索引</span><span class="tag green" style="margin-left:6px">已可运行</span></div>
+    <h1 class="h1">点一本书，<br>它知道自己放在哪里。</h1>
+    <p class="lead">这是「数智幻境」与普通展馆页面的分界线：书不是一张图，是一条记录。场景、书柜、书册三级编号与坐标绑定，点选即可调档，也可以从档案反查实物位置。</p>
+  </div>
+</section>
+
+<section class="sec sec--tight">
+  <div class="wrap">
+    <div class="sys">
+      <!-- 左：书柜 -->
+      <div class="shelf-col reveal">
+        <div class="searchbar">
+          <input id="q" placeholder="搜书名或著者，例：范氏奇书 / 范钦" aria-label="搜索藏书">
+          <button class="go" id="qBtn">检索</button>
+        </div>
+
+        <div class="cabs" id="cabs"></div>
+
+        <div class="shelfbox">
+          <div class="shelf-hd">
+            <span id="cabName">A 柜 · 经部</span>
+            <span>共 <b id="cabCount" style="color:var(--ivory)">—</b> 部 · 点击书脊查看档案</span>
+          </div>
+          <div id="shelves"></div>
+          <div class="scanline" id="scanline"></div>
+        </div>
+
+        <div class="counts">
+          <div><b id="cTotal">0</b>收录条目</div>
+          <div><b id="cDigi">0</b>已数字化</div>
+          <div><b id="cList">0</b>我的清单</div>
+        </div>
+      </div>
+
+      <!-- 右：档案 -->
+      <div class="reveal" data-d="1" id="docWrap">
+        <div class="doc" id="doc"></div>
+        <p class="doc-note">
+          数据说明：本页为交互原型，书目字段为<b style="color:var(--ivory-2)">示例数据</b>，用于验证「点选—调档—反查」的链路与信息结构。正式版需接入馆方书目或公开古籍目录，字段口径以馆方为准。坐标值为演示占位，实际由点云配准后写入。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--tight">
+  <div class="wrap">
+    <div class="grid g3">
+      <div class="card reveal">
+        <div class="card-h"><span class="tag gold">任务 8</span></div>
+        <h3 class="card-t">档案结构化</h3>
+        <p class="card-p">编号、书名、著者、版本、年代、馆藏位置六个字段先行。字段不求多，求每一本都能填满。</p>
+      </div>
+      <div class="card reveal" data-d="1">
+        <div class="card-h"><span class="tag gold">任务 9</span></div>
+        <h3 class="card-t">三级关联绑定</h3>
+        <p class="card-p">「书—柜—场景」不是三个列表，是一张映射表。左边每一次点选，走的都是同一条关联。</p>
+      </div>
+      <div class="card reveal" data-d="2">
+        <div class="card-h"><span class="tag gold">任务 10</span></div>
+        <h3 class="card-t">点选 → 调档 → 反查</h3>
+        <p class="card-p">正向是「我想看这本书」，反向是「这本书在哪」。两个方向都通，数据孪生才立得住。</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="wrap" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;width:100%">
+  <span>天一阁 · 数智幻境 ／ demo-06 · 三级索引</span>
+  <span>纯前端数据结构 · 可直接替换为 JSON / 接口</span>
+</div></footer>
+
+<script src="assets/store.js"></script>
+<script>
+(function(){
+  /* ================= 示例书目 ================= */
+  var BOOKS = [
+    {c:'A',s:1,t:'范氏奇书',a:'明·范钦 辑',e:'明嘉靖刻本',y:'1522—1566',v:'二十种 四十册',st:'已数字化',tags:['善本','丛部'],x:'4.12',yy:'1.06',z:'2.34'},
+    {c:'A',s:1,t:'天一阁书目',a:'清·范邦甸 编',e:'清嘉庆十三年刻本',y:'1808',v:'十卷 四册',st:'已数字化',tags:['目録','史部'],x:'4.38',yy:'1.06',z:'2.34'},
+    {c:'A',s:1,t:'周易略例',a:'魏·王弼 撰',e:'明刻本',y:'嘉靖',v:'一卷 一册',st:'待数字化',tags:['经部'],x:'4.61',yy:'1.06',z:'2.34'},
+    {c:'A',s:2,t:'春秋繁露',a:'汉·董仲舒 撰',e:'明嘉靖刻本',y:'1547',v:'十七卷 六册',st:'已数字化',tags:['经部','善本'],x:'4.12',yy:'1.42',z:'2.34'},
+    {c:'A',s:2,t:'中说',a:'隋·王通 撰',e:'明刻本',y:'万历',v:'十卷 二册',st:'待数字化',tags:['子部'],x:'4.40',yy:'1.42',z:'2.34'},
+    {c:'A',s:3,t:'四明丛书',a:'民国·张寿镛 辑',e:'民国四明张氏约园刻本',y:'1932—1948',v:'八集 三百二十册',st:'部分数字化',tags:['丛部','地方文献'],x:'4.12',yy:'1.78',z:'2.34'},
+    {c:'A',s:3,t:'甬上耆旧诗',a:'清·胡文学 辑',e:'清康熙刻本',y:'1673',v:'三十卷 十册',st:'已数字化',tags:['集部','地方文献'],x:'4.48',yy:'1.78',z:'2.34'},
+    {c:'A',s:4,t:'明州系年录',a:'清·董沛 撰',e:'清光绪刻本',y:'1889',v:'七卷 三册',st:'待数字化',tags:['史部','地方文献'],x:'4.16',yy:'2.14',z:'2.34'},
+
+    {c:'B',s:1,t:'鄞县志',a:'清·钱维乔 修',e:'清乾隆五十三年刻本',y:'1788',v:'三十卷 十六册',st:'已数字化',tags:['史部','方志'],x:'2.06',yy:'1.06',z:'2.34'},
+    {c:'B',s:1,t:'甬东天后宫志',a:'清·董沛 撰',e:'清光绪刻本',y:'1885',v:'四卷 二册',st:'待数字化',tags:['史部','海事'],x:'2.34',yy:'1.06',z:'2.34'},
+    {c:'B',s:2,t:'历朝茶马政要',a:'明·杨时乔 撰',e:'明万历刻本',y:'1602',v:'七卷 四册',st:'已数字化',tags:['史部','善本'],x:'2.06',yy:'1.42',z:'2.34'},
+    {c:'B',s:2,t:'天一阁碑目',a:'清·范懋敏 编',e:'清乾隆刻本',y:'1775',v:'一卷 一册',st:'已数字化',tags:['目録','金石'],x:'2.38',yy:'1.42',z:'2.34'},
+    {c:'B',s:3,t:'宁波府城图',a:'清·佚名 绘',e:'清道光绘本',y:'1840 前后',v:'一幅',st:'已数字化',tags:['舆图','地方文献'],x:'2.06',yy:'1.78',z:'2.34'},
+    {c:'B',s:3,t:'四明谈助',a:'清·徐兆昺 撰',e:'清道光刻本',y:'1828',v:'四十六卷 十二册',st:'待数字化',tags:['史部','地方文献'],x:'2.42',yy:'1.78',z:'2.34'},
+    {c:'B',s:4,t:'句余土音',a:'清·全祖望 撰',e:'清乾隆刻本',y:'1750 前后',v:'三卷 二册',st:'待数字化',tags:['集部'],x:'2.10',yy:'2.14',z:'2.34'},
+
+    {c:'C',s:1,t:'麻将牌谱辑要',a:'民国·佚名 辑',e:'民国石印本',y:'1920 前后',v:'二卷 一册',st:'待数字化',tags:['专题','民俗'],x:'1.02',yy:'1.06',z:'2.34'},
+    {c:'C',s:1,t:'陈鱼门先生传略',a:'甬上·洪克亮 识',e:'馆藏展陈文本',y:'当代',v:'一册',st:'已数字化',tags:['专题','人物'],x:'1.30',yy:'1.06',z:'2.34'},
+    {c:'C',s:2,t:'清稗类钞·叉麻雀',a:'徐珂 编',e:'民国商务印书馆排印本',y:'1917',v:'摘编 一册',st:'已数字化',tags:['专题','文献'],x:'1.02',yy:'1.42',z:'2.34'},
+    {c:'C',s:2,t:'马吊牌经',a:'明·冯梦龙 撰',e:'明刻本（影印）',y:'崇祯',v:'一卷 一册',st:'待数字化',tags:['专题','博戏'],x:'1.32',yy:'1.42',z:'2.34'},
+    {c:'C',s:3,t:'叶子戏源流考',a:'今人 编',e:'整理稿本',y:'2024',v:'一册',st:'已数字化',tags:['专题','研究'],x:'1.04',yy:'1.78',z:'2.34'},
+    {c:'C',s:3,t:'日本麻将沿革',a:'日·名川彦作 相关',e:'编译稿本',y:'2025',v:'一册',st:'待数字化',tags:['专题','传播'],x:'1.28',yy:'1.78',z:'2.34'},
+    {c:'C',s:4,t:'西洋麻将图录',a:'佚名 编',e:'影印图录',y:'2023',v:'一册',st:'已数字化',tags:['专题','图像'],x:'1.06',yy:'2.14',z:'2.34'}
+  ];
+
+  var CABS = { A:'A 柜 · 经部', B:'B 柜 · 史部', C:'C 柜 · 专题' };
+  var COLORS = ['#3E5A48','#5A4436','#2F4A5A','#5E4A2E','#4A3B4E','#3A5148','#5C3B33'];
+  var SPINE_W = { A:[22,26,30], B:[24,28,33], C:[20,24,28] };
+
+  var state = { cab:'A', book:null, list:[] };
+  try{ state.list = JSON.parse(localStorage.getItem('tianyige.shortlist') || '[]'); }catch(e){}
+
+  /* ================= 柜 tab ================= */
+  var cabsEl = document.getElementById('cabs');
+  Object.keys(CABS).forEach(function(k){
+    var b = document.createElement('button');
+    b.className = 'cab-tab' + (k === 'A' ? ' on' : '');
+    b.dataset.c = k;
+    b.innerHTML = '<b>' + CABS[k] + '</b><span>' + BOOKS.filter(function(x){return x.c===k;}).length + ' 部在架</span>';
+    b.onclick = function(){ state.cab = k; renderCab(); TY.track('藏·三级索引','切换书柜',{cab:k}); };
+    cabsEl.appendChild(b);
+  });
+
+  /* ================= 书柜渲染 ================= */
+  function renderCab(){
+    cabsEl.querySelectorAll('.cab-tab').forEach(function(b){ b.classList.toggle('on', b.dataset.c === state.cab); });
+    document.getElementById('cabName').textContent = CABS[state.cab];
+    var list = BOOKS.filter(function(b){ return b.c === state.cab; });
+    document.getElementById('cabCount').textContent = list.length;
+
+    var box = document.getElementById('shelves');
+    box.innerHTML = '';
+    for(var s = 1; s <= 4; s++){
+      var shelf = document.createElement('div');
+      shelf.className = 'shelf';
+      shelf.dataset.s = s;
+      var no = document.createElement('div');
+      no.className = 'shelf-no';
+      no.textContent = '第 ' + s + ' 格';
+      no.style.left = '0'; no.style.top = '-13px';
+      shelf.appendChild(no);
+
+      var items = list.filter(function(b){ return b.s === s; });
+      var i = 0;
+      items.forEach(function(bk){
+        var idx = BOOKS.indexOf(bk);
+        var el = document.createElement('button');
+        el.className = 'spine';
+        el.dataset.i = idx;
+        var w = SPINE_W[state.cab][idx % 3];
+        var h = 104 + ((idx * 13) % 38);
+        el.style.width = w + 'px';
+        el.style.height = h + 'px';
+        el.style.background = 'linear-gradient(180deg,' + COLORS[idx % COLORS.length] + ',' + COLORS[(idx+3) % COLORS.length] + ')';
+        if(bk.st === '已数字化') el.classList.add('digit');
+        el.textContent = bk.t.slice(0, 4);
+        el.title = bk.t + ' · ' + bk.a;
+        el.onclick = function(){ pick(idx); };
+        shelf.appendChild(el);
+        i++;
+      });
+      // 空格子占位（留白更像真书架）
+      for(var g = 0; g < Math.max(0, 3 - i); g++){
+        var sp = document.createElement('div');
+        sp.className = 'spine gap';
+        sp.style.width = (16 + g * 7) + 'px';
+        sp.style.height = '54px';
+        shelf.appendChild(sp);
+      }
+      box.appendChild(shelf);
+    }
+  }
+
+  /* ================= 档案 ================= */
+  function pathHTML(bk, lit){
+    var p = ['宝书楼 · 二层', bk.c + ' 柜', '第 ' + bk.s + ' 格', '第 ' + (BOOKS.filter(function(x){return x.c===bk.c&&x.s===bk.s;}).indexOf(bk) + 1) + ' 册'];
+    return p.map(function(x, i){
+      return '<span class="' + (lit >= i ? 'on' : '') + '">' + x + '</span>' + (i < 3 ? '<i>›</i>' : '');
+    }).join('');
+  }
+
+  function pick(idx, silent){
+    var bk = BOOKS[idx];
+    state.book = bk;
+    document.querySelectorAll('.spine.on').forEach(function(x){ x.classList.remove('on'); });
+    var el = document.querySelector('.spine[data-i="' + idx + '"]');
+    if(el) el.classList.add('on');
+
+    var inList = state.list.indexOf(bk.t) > -1;
+    document.getElementById('doc').innerHTML =
+      '<div class="doc-badge"><span class="tag ' + (bk.st === '已数字化' ? 'green' : '') + '">' + bk.st + '</span></div>' +
+      '<div class="doc-no">' + (bk.c + '-' + String(bk.s).padStart(2,'0') + '-' + String(BOOKS.filter(function(x){return x.c===bk.c&&x.s===bk.s;}).indexOf(bk) + 1).padStart(2,'0')) + ' · 示例编号</div>' +
+      '<h2 class="doc-t">' + bk.t + '</h2>' +
+      '<div class="doc-sub">' + bk.a + '</div>' +
+      '<dl class="meta">' +
+        '<dt>版本</dt><dd>' + bk.e + '</dd>' +
+        '<dt>年代</dt><dd>' + bk.y + '</dd>' +
+        '<dt>册数</dt><dd>' + bk.v + '</dd>' +
+        '<dt>坐标</dt><dd style="font-family:Menlo,monospace;font-size:12px">X ' + bk.x + '　Y ' + bk.yy + '　Z ' + bk.z + '（m）</dd>' +
+      '</dl>' +
+      '<div class="path" id="path">' + pathHTML(bk, -1) + '</div>' +
+      '<div class="doc-tags">' + bk.tags.map(function(t){ return '<span class="chip">' + t + '</span>'; }).join('') + '</div>' +
+      '<div class="doc-acts">' +
+        '<button class="btn btn-sm" id="locate">反查架上位置</button>' +
+        '<button class="btn btn-line btn-sm" id="addList">' + (inList ? '✓ 已在我的清单' : '加入我的清单') + '</button>' +
+      '</div>';
+
+    document.getElementById('locate').onclick = function(){ locate(bk, idx); };
+    document.getElementById('addList').onclick = function(){
+      var i = state.list.indexOf(bk.t);
+      if(i > -1) state.list.splice(i, 1); else state.list.push(bk.t);
+      try{ localStorage.setItem('tianyige.shortlist', JSON.stringify(state.list)); }catch(e){}
+      this.textContent = (i > -1 ? '加入我的清单' : '✓ 已在我的清单');
+      document.getElementById('cList').textContent = state.list.length;
+      TY.track('藏·三级索引', i > -1 ? '移出清单' : '加入清单', {book:bk.t});
+    };
+    if(!silent) TY.track('藏·三级索引','点选藏书',{book:bk.t});
+  }
+
+  function locate(bk, idx){
+    // 切柜
+    if(state.cab !== bk.c){
+      state.cab = bk.c; renderCab(); pick(idx, true);
+      var el2 = document.querySelector('.spine[data-i="' + idx + '"]');
+      if(el2) el2.classList.add('on');
+    }
+    var shelf = document.querySelector('.shelf[data-s="' + bk.s + '"]');
+    document.querySelectorAll('.shelf.hl').forEach(function(x){ x.classList.remove('hl'); });
+    if(shelf) shelf.classList.add('hl');
+
+    var line = document.getElementById('scanline');
+    line.classList.remove('run'); void line.offsetWidth; line.classList.add('run');
+
+    var p = document.getElementById('path');
+    if(p){
+      var spans = p.querySelectorAll('span');
+      spans.forEach(function(s, i){
+        s.classList.remove('on');
+        setTimeout(function(){ s.classList.add('on'); }, 160 * i);
+      });
+    }
+    TY.track('藏·三级索引','反查架上位置',{book:bk.t});
+  }
+
+  /* ================= 检索 ================= */
+  function search(){
+    var q = document.getElementById('q').value.trim();
+    if(!q) return;
+    var hit = BOOKS.filter(function(b){ return b.t.indexOf(q) > -1 || b.a.indexOf(q) > -1; })[0];
+    if(!hit){
+      document.getElementById('doc').innerHTML = '<div class="empty">没有找到「' + q + '」<br><span style="font-size:11.5px">试试：范氏奇书 · 鄞县志 · 麻将</span></div>';
+      TY.track('藏·三级索引','检索未命中',{q:q});
+      return;
+    }
+    state.cab = hit.c; renderCab();
+    pick(BOOKS.indexOf(hit));
+    locate(hit, BOOKS.indexOf(hit));
+    TY.track('藏·三级索引','检索命中',{q:q, book:hit.t});
+  }
+  document.getElementById('qBtn').onclick = search;
+  document.getElementById('q').addEventListener('keydown', function(e){ if(e.key === 'Enter') search(); });
+
+  /* ================= 初始化 ================= */
+  document.getElementById('cTotal').textContent = BOOKS.length;
+  document.getElementById('cDigi').textContent = BOOKS.filter(function(b){return b.st==='已数字化';}).length;
+  document.getElementById('cList').textContent = state.list.length;
+  renderCab();
+  pick(0, true);
+  TY.track('藏·三级索引','进入页面');
+})();
+</script>
+</body>
+</html>

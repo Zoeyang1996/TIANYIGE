@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>续 · 我的牌面 ｜ 天一阁 · 数智幻境</title>
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+.hero{padding:132px 0 26px}
+.hero .h1{font-size:clamp(30px,4vw,48px);max-width:22ch}
+.hero .lead{margin-top:20px}
+
+.gen{display:grid;grid-template-columns:400px 1fr;gap:56px;align-items:start;margin-top:10px}
+.preview-col{position:sticky;top:84px}
+.canvas-box{
+  border:1px solid var(--line);border-radius:4px;padding:22px;
+  background:radial-gradient(60% 50% at 50% 40%, rgba(92,122,99,.16), transparent 74%);
+  display:grid;place-items:center;
+}
+canvas#card{width:100%;max-width:330px;height:auto;border-radius:3px;
+  box-shadow:0 30px 60px -26px rgba(0,0,0,.9);display:block}
+.pv-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--ivory-3);margin-top:14px;letter-spacing:.08em}
+
+.ctrl{border-left:1px solid var(--line);padding-left:44px}
+.blk{margin-bottom:28px}
+.blk-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px}
+.blk-t{font-size:12px;letter-spacing:.16em;color:var(--ivory-3)}
+.blk-h em{font-style:normal;font-size:11px;color:var(--gold);letter-spacing:.1em}
+.opts{display:flex;gap:7px;flex-wrap:wrap}
+.opt{
+  background:rgba(243,234,218,.03);border:1px solid var(--line);color:var(--ivory-2);
+  min-width:38px;height:38px;padding:0 12px;border-radius:2px;font-size:14px;
+  font-family:var(--serif);letter-spacing:.06em;transition:.24s;display:grid;place-items:center;
+}
+.opt:hover{border-color:rgba(243,234,218,.4);color:var(--ivory);background:rgba(243,234,218,.07)}
+.opt.on{border-color:rgba(196,87,63,.65);background:rgba(161,58,44,.16);color:#F8EADA}
+.opt.small{font-family:var(--sans);font-size:12.5px;height:34px;min-width:0;letter-spacing:.06em}
+.bless-list{display:flex;flex-direction:column;gap:6px}
+.bless{
+  text-align:left;background:none;border:1px solid var(--line);border-radius:2px;
+  padding:9px 13px;font-size:13px;color:var(--ivory-2);transition:.24s;
+  display:flex;justify-content:space-between;gap:10px;align-items:center;
+  font-family:var(--serif);letter-spacing:.05em;
+}
+.bless:hover{border-color:rgba(243,234,218,.36);color:var(--ivory)}
+.bless.on{border-color:rgba(196,87,63,.55);background:rgba(161,58,44,.12);color:#F8EADA}
+.bless span{font-family:var(--sans);font-size:10.5px;color:var(--ivory-3);letter-spacing:0;white-space:nowrap}
+.inp{
+  width:100%;background:rgba(15,24,21,.5);border:1px solid var(--line);border-radius:2px;
+  color:var(--ivory);padding:10px 13px;font-family:var(--serif);font-size:15px;letter-spacing:.14em;
+  outline:none;transition:.24s;
+}
+.inp:focus{border-color:rgba(196,87,63,.55);background:rgba(15,24,21,.8)}
+.inp::placeholder{color:var(--ivory-3);font-size:13px;letter-spacing:.06em}
+.act-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:34px;padding-top:26px;border-top:1px solid var(--line)}
+.hint{font-size:11.5px;color:var(--ivory-3);margin-top:16px;line-height:1.8}
+
+@media(max-width:1000px){
+  .gen{grid-template-columns:1fr;gap:32px}
+  .ctrl{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:30px}
+  .preview-col{position:static}
+  canvas#card{max-width:260px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">天</span><span>天一阁 · 数智幻境</span></a>
+  <nav class="topnav">
+    <a href="demo-01-paiqiang.html">序·牌墙</a>
+    <a href="demo-02-paimian.html">解·牌面</a>
+    <a href="demo-03-zhibianzhu.html">定·纸变竹</a>
+    <a href="demo-04-hangxian.html">传·航线</a>
+    <a href="demo-05-wodepaimian.html">续·我的牌面</a>
+    <a href="demo-06-shucang.html">藏·索引</a>
+    <a href="demo-07-dashboard.html">观·看板</a>
+  </nav>
+  <a class="back" href="index.html">总览 ↗</a>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span>EPILOGUE</span><span class="zh">续 · 三缺一</span></div>
+    <h1 class="h1">平和堂留了一个空位，<br>是给你的。</h1>
+    <p class="lead">选一张字牌、一种材质、一句宁波话，生成一张属于你的牌面卡。这是全站唯一由观众创作的内容，也是最适合被分享出去的一张图。</p>
+  </div>
+</section>
+
+<section class="sec sec--tight">
+  <div class="wrap">
+    <div class="gen">
+      <!-- 预览 -->
+      <div class="preview-col reveal">
+        <div class="canvas-box">
+          <canvas id="card" width="760" height="1040"></canvas>
+        </div>
+        <div class="pv-meta">
+          <span>760 × 1040 px · PNG</span>
+          <span id="cardNo">TYG-2026-0000</span>
+        </div>
+      </div>
+
+      <!-- 控件 -->
+      <div class="ctrl">
+        <div class="blk reveal">
+          <div class="blk-h"><span class="blk-t">一 · 选一张字牌</span><em>7 选 1</em></div>
+          <div class="opts" id="glyphOpts"></div>
+        </div>
+
+        <div class="blk reveal" data-d="1">
+          <div class="blk-h"><span class="blk-t">二 · 选一种材质</span><em>决定底纹与侧边</em></div>
+          <div class="opts" id="matOpts"></div>
+        </div>
+
+        <div class="blk reveal" data-d="2">
+          <div class="blk-h"><span class="blk-t">三 · 选一句宁波话</span><em>点击切换</em></div>
+          <div class="bless-list" id="blessList"></div>
+        </div>
+
+        <div class="blk reveal" data-d="3">
+          <div class="blk-h"><span class="blk-t">四 · 落款</span><em>最多 6 字</em></div>
+          <input class="inp" id="sign" maxlength="6" placeholder="写下你的名字" value="">
+        </div>
+
+        <div class="act-row reveal" data-d="4">
+          <button class="btn" id="download">下载牌面卡 ↓</button>
+          <button class="btn btn-line" id="random">随机来一张</button>
+        </div>
+
+        <p class="hint">生成的牌面编号按「年份 + 当日序号」自动编排，可用于分享与统计。所有内容在本机生成，不上传任何数据。</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="wrap" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;width:100%">
+  <span>天一阁 · 数智幻境 ／ demo-05 · 我的牌面</span>
+  <span>Canvas 实时绘制 · 一键导出 PNG</span>
+</div></footer>
+
+<script src="assets/store.js"></script>
+<script>
+(function(){
+  var GLYPHS = [
+    {k:'zhong', c:'中', color:'#A13A2C', name:'红中', note:'由「老千」改称'},
+    {k:'fa',    c:'發', color:'#2C5F46', name:'绿发', note:'由「红花」改称'},
+    {k:'bai',   c:'白', color:'#3A3A34', name:'白板', note:'由「白花」改称'},
+    {k:'dong',  c:'東', color:'#1C2B26', name:'东风', note:'庄家风位'},
+    {k:'nan',   c:'南', color:'#1C2B26', name:'南风', note:'下家风位'},
+    {k:'xi',    c:'西', color:'#1C2B26', name:'西风', note:'对家风位'},
+    {k:'bei',   c:'北', color:'#1C2B26', name:'北风', note:'上家风位'}
+  ];
+  var MATS = [
+    {k:'bamboo', n:'竹骨', bg:'#F1E5CE', bg2:'#E4D2B2', edge:'#4E6B57', ink:'#1C2B26', name:'竹背象牙面'},
+    {k:'ivory',  n:'象牙', bg:'#FBF4E6', bg2:'#EFE2CA', edge:'#9A7D4A', ink:'#1C2B26', name:'象牙面'},
+    {k:'wood',   n:'木质', bg:'#DCC09A', bg2:'#C8A87F', edge:'#7A5B37', ink:'#241C14', name:'木纹手作'}
+  ];
+  var BLESS = [
+    {t:'搓两圈再走', d:'宁波话 · 留客'},
+    {t:'手气顺过三江口', d:'水路顺 · 牌桌顺'},
+    {t:'牌品即人品', d:'老话 · 训诫'},
+    {t:'万事俱备，只等一张', d:'停牌的状态'},
+    {t:'麻雀飞进天井', d:'馆内实景'},
+    {t:'和了', d:'读 hú · 最简短的一句'}
+  ];
+
+  var st = { g: 0, m: 0, b: 0, sign: '' };
+  var canvas = document.getElementById('card');
+  var ctx = canvas.getContext('2d');
+  var W = 760, H = 1040;
+
+  /* ---------- 编号 ---------- */
+  function serial(){
+    var d = new Date();
+    var y = d.getFullYear();
+    var n = 1;
+    try{
+      var k = 'tianyige.cardseq.' + y + '.' + (d.getMonth()+1) + '.' + d.getDate();
+      n = (+localStorage.getItem(k) || 0) + 1;
+      localStorage.setItem(k, n);
+    }catch(e){}
+    return 'TYG-' + y + '-' + String(n).padStart(4, '0');
+  }
+  var cardNo = serial();
+  document.getElementById('cardNo').textContent = cardNo;
+
+  /* ---------- 绘制 ---------- */
+  function spaced(text, x, y, sp, align){
+    var chars = text.split('');
+    var widths = chars.map(function(c){ return ctx.measureText(c).width; });
+    var total = widths.reduce(function(a,b){return a+b;},0) + sp * (chars.length - 1);
+    var cx = align === 'center' ? x - total / 2 : x;
+    ctx.textAlign = 'left';
+    chars.forEach(function(c, i){ ctx.fillText(c, cx, y); cx += widths[i] + sp; });
+    return total;
+  }
+
+  function roundRect(x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function wrap(text, x, y, maxW, lh){
+    var line = '', lines = [];
+    for(var i = 0; i < text.length; i++){
+      var t = line + text[i];
+      if(ctx.measureText(t).width > maxW && line){ lines.push(line); line = text[i]; }
+      else line = t;
+    }
+    if(line) lines.push(line);
+    lines.forEach(function(l, i){ ctx.fillText(l, x, y + i * lh); });
+    return lines.length;
+  }
+
+  function draw(){
+    var g = GLYPHS[st.g], m = MATS[st.m], b = BLESS[st.b];
+    ctx.clearRect(0, 0, W, H);
+
+    /* 底 */
+    var grd = ctx.createLinearGradient(0, 0, W, H);
+    grd.addColorStop(0, m.bg);
+    grd.addColorStop(.55, m.bg2);
+    grd.addColorStop(1, m.bg);
+    ctx.fillStyle = grd;
+    roundRect(0, 0, W, H, 16);
+    ctx.fill();
+
+    /* 侧边厚度 */
+    ctx.save();
+    ctx.globalAlpha = .9;
+    ctx.fillStyle = m.edge;
+    roundRect(W - 22, 0, 22, H, 0);
+    ctx.fill();
+    roundRect(0, 0, W, 10, 0);
+    ctx.fill();
+    ctx.restore();
+
+    /* 材质纹理 */
+    ctx.save();
+    if(st.m === 0){        // 竹
+      ctx.strokeStyle = 'rgba(120,100,64,.10)';
+      for(var i = 0; i < 40; i++){
+        ctx.beginPath();
+        ctx.moveTo(0, i * 27 + 10);
+        ctx.lineTo(W, i * 27 + 18);
+        ctx.stroke();
+      }
+    } else if(st.m === 1){ // 象牙
+      ctx.strokeStyle = 'rgba(160,130,90,.09)';
+      for(var j = 0; j < 9; j++){
+        ctx.beginPath();
+        ctx.ellipse(W/2, H/2, 120 + j * 46, 200 + j * 58, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    } else {               // 木
+      ctx.strokeStyle = 'rgba(90,60,30,.14)';
+      for(var k = 0; k < 26; k++){
+        ctx.beginPath();
+        ctx.moveTo(0, k * 42);
+        ctx.bezierCurveTo(W*.3, k*42 - 14, W*.6, k*42 + 18, W, k*42 - 4);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+
+    /* 边框 */
+    ctx.strokeStyle = 'rgba(28,43,38,.28)';
+    ctx.lineWidth = 2;
+    roundRect(34, 34, W - 90, H - 68, 6);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(28,43,38,.14)';
+    ctx.lineWidth = 1;
+    roundRect(44, 44, W - 110, H - 88, 4);
+    ctx.stroke();
+
+    /* 顶部标识 */
+    ctx.fillStyle = 'rgba(28,43,38,.55)';
+    ctx.font = '500 17px "Songti SC","STSong",serif';
+    spaced('天一阁 · 麻将起源地陈列馆', 62, 82, 2);
+    ctx.fillStyle = 'rgba(28,43,38,.32)';
+    ctx.font = '400 13px "PingFang SC",sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(cardNo, W - 62, 82);
+    ctx.textAlign = 'left';
+
+    /* 大字号牌 */
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = g.color;
+    if(g.k === 'bai'){
+      ctx.strokeStyle = g.color;
+      ctx.lineWidth = 5;
+      ctx.font = '500 250px "Songti SC","STSong",serif';
+      ctx.strokeText('白', W/2 - 11, 400);
+      ctx.strokeStyle = 'rgba(28,43,38,.22)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(W/2 - 150, 250, 280, 300);
+    } else {
+      ctx.font = '500 300px "Songti SC","STSong",serif';
+      ctx.fillText(g.c, W/2 - 11, 400);
+    }
+    ctx.restore();
+
+    /* 牌名 */
+    ctx.fillStyle = 'rgba(28,43,38,.72)';
+    ctx.font = '500 26px "Songti SC","STSong",serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(g.name + ' · ' + m.name, W/2 - 11, 600);
+    ctx.textAlign = 'left';
+
+    /* 分隔 */
+    ctx.strokeStyle = 'rgba(28,43,38,.20)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(140, 640); ctx.lineTo(W - 150, 640); ctx.stroke();
+
+    /* 祝福 */
+    ctx.fillStyle = 'rgba(28,43,38,.88)';
+    ctx.font = '400 44px "Songti SC","STSong",serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('「' + b.t + '」', W/2 - 11, 716);
+    ctx.textAlign = 'left';
+
+    ctx.fillStyle = 'rgba(28,43,38,.42)';
+    ctx.font = '400 16px "PingFang SC",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(b.d, W/2 - 11, 754);
+    ctx.textAlign = 'left';
+
+    /* 落款 + 印 */
+    var sign = (st.sign || '').trim();
+    ctx.fillStyle = 'rgba(28,43,38,.60)';
+    ctx.font = '400 15px "PingFang SC",sans-serif';
+    spaced('落 款', 70, 872, 1);
+
+    ctx.fillStyle = 'rgba(28,43,38,.92)';
+    ctx.font = '500 34px "Songti SC","STSong",serif';
+    if(sign){
+      spaced(sign, 70, 918, 6);
+    } else {
+      ctx.fillStyle = 'rgba(28,43,38,.22)';
+      ctx.font = '400 22px "PingFang SC",sans-serif';
+      ctx.fillText('待落款', 70, 914);
+    }
+
+    /* 印章 */
+    ctx.save();
+    ctx.translate(W - 150, 890);
+    ctx.fillStyle = 'rgba(161,58,44,.90)';
+    roundRect(0, 0, 86, 86, 4);
+    ctx.fill();
+    ctx.fillStyle = '#F6E9D8';
+    ctx.font = '500 34px "Songti SC","STSong",serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    var seal = sign ? sign.slice(0, 1) : '天';
+    ctx.fillText(seal, 43, 40);
+    ctx.font = '400 11px "PingFang SC",sans-serif';
+    ctx.fillText('天一阁', 43, 68);
+    ctx.restore();
+
+    /* 底部 */
+    ctx.fillStyle = 'rgba(28,43,38,.30)';
+    ctx.font = '400 12px "PingFang SC",sans-serif';
+    spaced('宁波 · 天一街 10 号 · 麻将起源于此', 70, H - 62, 1.6);
+  }
+
+  /* ---------- 控件渲染 ---------- */
+  function buildControls(){
+    var go = document.getElementById('glyphOpts');
+    GLYPHS.forEach(function(g, i){
+      var b = document.createElement('button');
+      b.className = 'opt' + (i === 0 ? ' on' : '');
+      b.textContent = g.c;
+      b.title = g.name + ' · ' + g.note;
+      b.onclick = function(){
+        st.g = i;
+        go.querySelectorAll('.opt').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+        draw(); TY.track('续·我的牌面','切换字牌',{g:g.name});
+      };
+      go.appendChild(b);
+    });
+
+    var mo = document.getElementById('matOpts');
+    MATS.forEach(function(m, i){
+      var b = document.createElement('button');
+      b.className = 'opt small' + (i === 0 ? ' on' : '');
+      b.textContent = m.n;
+      b.onclick = function(){
+        st.m = i;
+        mo.querySelectorAll('.opt').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+        draw(); TY.track('续·我的牌面','切换材质',{m:m.n});
+      };
+      mo.appendChild(b);
+    });
+
+    var bl = document.getElementById('blessList');
+    BLESS.forEach(function(x, i){
+      var b = document.createElement('button');
+      b.className = 'bless' + (i === 0 ? ' on' : '');
+      b.innerHTML = '<span style="font-family:var(--serif);font-size:13.5px;color:inherit">' + x.t + '</span><span>' + x.d + '</span>';
+      b.onclick = function(){
+        st.b = i;
+        bl.querySelectorAll('.bless').forEach(function(y){ y.classList.remove('on'); });
+        b.classList.add('on');
+        draw(); TY.track('续·我的牌面','切换祝福',{b:x.t});
+      };
+      bl.appendChild(b);
+    });
+  }
+
+  document.getElementById('sign').addEventListener('input', function(){
+    st.sign = this.value;
+    draw();
+  });
+
+  document.getElementById('random').addEventListener('click', function(){
+    st.g = Math.floor(Math.random() * GLYPHS.length);
+    st.m = Math.floor(Math.random() * MATS.length);
+    st.b = Math.floor(Math.random() * BLESS.length);
+    document.querySelectorAll('#glyphOpts .opt').forEach(function(x, i){ x.classList.toggle('on', i === st.g); });
+    document.querySelectorAll('#matOpts .opt').forEach(function(x, i){ x.classList.toggle('on', i === st.m); });
+    document.querySelectorAll('#blessList .bless').forEach(function(x, i){ x.classList.toggle('on', i === st.b); });
+    draw();
+    TY.track('续·我的牌面','随机生成');
+  });
+
+  document.getElementById('download').addEventListener('click', function(){
+    var name = '我的牌面_' + cardNo + '.png';
+    canvas.toBlob(function(blob){
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1200);
+    }, 'image/png');
+    TY.track('续·我的牌面','下载牌面卡',{g:GLYPHS[st.g].name, m:MATS[st.m].n, b:BLESS[st.b].t, no:cardNo});
+  });
+
+  buildControls();
+  draw();
+  TY.track('续·我的牌面','进入页面');
+})();
+</script>
+</body>
+</html>

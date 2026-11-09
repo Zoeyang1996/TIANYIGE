@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>定 · 纸变竹 ｜ 天一阁 · 数智幻境</title>
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+.hero{padding:124px 0 18px}
+.hero .h1{font-size:clamp(28px,3.4vw,42px);max-width:none}
+.hero .lead{margin-top:20px}
+
+/* ---------- 材质实验台 ---------- */
+.lab{display:grid;grid-template-columns:1fr 400px;gap:56px;align-items:center;margin-top:10px}
+.stage3d{
+  perspective:1400px;perspective-origin:50% 45%;
+  height:480px;display:grid;place-items:center;position:relative;
+  border:1px solid var(--line-2);border-radius:4px;
+  background:
+    radial-gradient(50% 46% at 50% 46%, rgba(92,122,99,.16), transparent 72%),
+    linear-gradient(180deg,rgba(243,234,218,.025),transparent);
+  cursor:grab;overflow:hidden;
+}
+.stage3d:active{cursor:grabbing}
+.stage3d::after{
+  content:"";position:absolute;left:50%;bottom:70px;width:340px;height:26px;transform:translateX(-50%);
+  background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.55), transparent 70%);
+  filter:blur(4px);
+}
+.tile3{
+  position:relative;width:230px;height:306px;
+  --th:2px;
+  transform-style:preserve-3d;
+  transform:rotateX(16deg) rotateY(-26deg);
+  transition:transform .5s var(--ease);
+}
+.f3{position:absolute;inset:0;border-radius:7px;transform-style:preserve-3d}
+/* 正面：象牙牌面 */
+.f-front{
+  transform:translateZ(calc(var(--th) / 2));
+  background:linear-gradient(150deg,#FBF4E7,#F0E4D0 58%,#E2D2B6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.4);
+  display:grid;place-items:center;overflow:hidden;
+}
+.f-front svg{width:64%;height:70%}
+/* 背面与四个侧面：真实厚度 */
+.f-back{
+  transform:translateZ(calc(var(--th) / -2));
+  background:var(--edge);
+  box-shadow:inset 0 0 40px rgba(0,0,0,.25);
+}
+.f-right{
+  left:100%;width:var(--th);border-radius:0;
+  background-color:var(--edge);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.20),rgba(0,0,0,.30));
+  transform-origin:left center;
+  transform:translateZ(calc(var(--th) / -2)) rotateY(-90deg);
+}
+.f-left{
+  width:var(--th);border-radius:0;
+  background-color:var(--edge);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.10),rgba(0,0,0,.34));
+  transform-origin:left center;
+  transform:translateZ(calc(var(--th) / 2)) rotateY(90deg);
+}
+.f-top{
+  height:var(--th);border-radius:0;
+  background-color:var(--edge);
+  background-image:linear-gradient(90deg,rgba(255,255,255,.24),rgba(0,0,0,.24));
+  transform-origin:center top;
+  transform:translateZ(calc(var(--th) / 2)) rotateX(-90deg);
+}
+.f-bottom{
+  top:100%;height:var(--th);border-radius:0;
+  background-color:var(--edge);
+  background-image:linear-gradient(90deg,rgba(0,0,0,.34),rgba(255,255,255,.10));
+  transform-origin:center top;
+  transform:translateZ(calc(var(--th) / -2)) rotateX(90deg);
+}
+.paper-curl{
+  position:absolute;right:-2px;bottom:-2px;width:56%;height:56%;
+  background:linear-gradient(315deg,rgba(255,255,255,.95),rgba(220,203,176,.9) 46%,rgba(190,168,132,.5));
+  border-radius:0 0 7px 0;
+  clip-path:polygon(100% 0,100% 100%,0 100%);
+  transform-origin:100% 100%;
+  box-shadow:-6px -6px 16px rgba(0,0,0,.16);
+  pointer-events:none;
+}
+.paper-fiber{
+  position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:
+    repeating-linear-gradient(48deg, rgba(150,128,96,.10) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-38deg, rgba(150,128,96,.07) 0 1px, transparent 1px 6px);
+}
+.bamboo-grain{
+  position:absolute;inset:0;border-radius:7px;pointer-events:none;
+  background-image:repeating-linear-gradient(180deg, rgba(255,255,255,.05) 0 1px, transparent 1px 5px);
+  opacity:0;
+}
+.lab-tip{
+  position:absolute;left:16px;bottom:14px;font-size:11px;letter-spacing:.14em;color:var(--ivory-3);
+}
+
+/* ---------- 控制区 ---------- */
+.ctrl-t{font-family:var(--serif);font-size:22px;margin-bottom:6px}
+.ctrl-p{font-size:13px;color:var(--ivory-2);margin:0 0 26px}
+.slider-wrap{margin-bottom:30px}
+.slider-lb{display:flex;justify-content:space-between;font-size:11.5px;letter-spacing:.14em;color:var(--ivory-3);margin-bottom:10px}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:2px;background:rgba(243,234,218,.22);outline:none;border-radius:2px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:var(--ivory);border:3px solid var(--red);cursor:grab;
+  box-shadow:0 2px 10px rgba(0,0,0,.5);
+}
+input[type=range]::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;background:var(--ivory);border:3px solid var(--red);cursor:grab;
+}
+.steps{display:flex;flex-direction:column;gap:2px;margin-bottom:24px}
+.step{
+  display:grid;grid-template-columns:26px 1fr;gap:12px;padding:12px 12px 12px 8px;
+  border-left:1px solid var(--line);transition:.4s;opacity:.42;
+}
+.step.on{opacity:1;border-left-color:var(--red-l);background:linear-gradient(90deg,rgba(161,58,44,.13),transparent 80%)}
+.step-n{font-family:var(--serif);font-size:12px;color:var(--gold);padding-top:2px}
+.step-t{font-family:var(--serif);font-size:15px;letter-spacing:.04em;margin-bottom:3px}
+.step-d{font-size:12px;color:var(--ivory-2);line-height:1.7;margin:0}
+
+/* ---------- 136 ---------- */
+.compose{display:grid;grid-template-columns:1fr 380px;gap:56px;align-items:center}
+.count-big{font-family:var(--serif);font-size:clamp(64px,9vw,108px);line-height:1;letter-spacing:.02em}
+.count-big small{font-size:.22em;color:var(--gold);letter-spacing:.2em;margin-left:10px}
+.bar{display:flex;height:56px;margin:26px 0 18px;border-radius:2px;overflow:hidden;border:1px solid var(--line)}
+.bar div{display:grid;place-items:center;font-size:11px;letter-spacing:.08em;color:rgba(20,31,27,.72);
+  transition:flex .7s var(--ease),opacity .5s;opacity:0;font-family:var(--sans)}
+.bar div.show{opacity:1}
+.bar .b1{background:#E6D6BA}
+.bar .b2{background:#C4573F;color:#FBF0E2}
+.bar .b3{background:#5C7A63;color:#F3EADA}
+.bar .b4{background:#9A7D4A;color:#F8EEDD}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--ivory-3)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:1px;display:block}
+.compose-steps{display:flex;flex-direction:column;gap:10px}
+.cs{
+  text-align:left;background:none;border:1px solid var(--line);border-radius:2px;padding:14px 16px;
+  color:var(--ivory-2);transition:.3s;display:flex;justify-content:space-between;gap:12px;align-items:center;
+}
+.cs:hover{border-color:rgba(243,234,218,.32);color:var(--ivory)}
+.cs.on{border-color:rgba(196,87,63,.6);background:rgba(161,58,44,.13);color:var(--ivory)}
+.cs b{font-family:var(--serif);font-size:16px;font-weight:500}
+.cs span{font-size:11.5px;color:var(--gold);letter-spacing:.08em;white-space:nowrap}
+
+@media(max-width:1000px){
+  .lab,.compose{grid-template-columns:1fr;gap:34px}
+  .stage3d{height:400px;order:1}
+  .ctrl{order:2}
+  .tile3{width:190px;height:252px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">天</span><span>天一阁 · 数智幻境</span></a>
+  <nav class="topnav">
+    <a href="demo-01-paiqiang.html">序·牌墙</a>
+    <a href="demo-02-paimian.html">解·牌面</a>
+    <a href="demo-03-zhibianzhu.html">定·纸变竹</a>
+    <a href="demo-04-hangxian.html">传·航线</a>
+    <a href="demo-05-wodepaimian.html">续·我的牌面</a>
+    <a href="demo-06-shucang.html">藏·索引</a>
+    <a href="demo-07-dashboard.html">观·看板</a>
+  </nav>
+  <a class="back" href="index.html">总览 ↗</a>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span>CHAPTER 02</span><span class="zh">定 · 陈鱼门与竹骨</span></div>
+    <h1 class="h1">一张纸牌，<br>为什么会变成一块骨头。</h1>
+    <p class="lead">同治三年（1864），陈鱼门把纸牌改成竹骨。这一步听起来像工艺改良，其实是整副牌能走遍世界的前提：纸会烂，竹不会。</p>
+  </div>
+</section>
+
+<!-- ========== 材质实验 ========== -->
+<section class="sec sec--tight">
+  <div class="wrap">
+    <div class="lab">
+      <div class="stage3d" id="stage3d">
+        <div class="tile3" id="tile3" style="--edge:#E4D6BC">
+          <div class="f3 f-back"></div>
+          <div class="f3 f-left"></div>
+          <div class="f3 f-right"></div>
+          <div class="f3 f-top"></div>
+          <div class="f3 f-bottom"></div>
+          <div class="f3 f-front">
+            <div class="paper-fiber" id="fiber"></div>
+            <div id="faceSvg"></div>
+            <div class="paper-curl" id="curl"></div>
+            <div class="bamboo-grain" id="grain"></div>
+          </div>
+        </div>
+        <div class="lab-tip">拖动可环绕观察 · 拖动下方滑块改变材质</div>
+      </div>
+
+      <div class="ctrl reveal">
+        <div class="ctrl-t">材质推演</div>
+        <p class="ctrl-p">从左到右，是十三年。左边是一张一吹就走的纸牌，右边是一块能传三代的竹骨牌。</p>
+
+        <div class="slider-wrap">
+          <div class="slider-lb"><span>纸 牌</span><span id="pct">0%</span><span>竹 骨</span></div>
+          <input type="range" id="slider" min="0" max="100" value="0" aria-label="纸变竹进度">
+        </div>
+
+        <div class="steps" id="steps">
+          <div class="step on" data-i="0">
+            <div class="step-n">01</div>
+            <div><div class="step-t">纸牌轻薄</div><p class="step-d">江海风大，牌常被吹落；一局未完，牌先软了边。</p></div>
+          </div>
+          <div class="step" data-i="1">
+            <div class="step-n">02</div>
+            <div><div class="step-t">加衬与包边</div><p class="step-d">玩家自己给纸牌裱背、包角——需求已经出现了，只是还没有人把它做成产品。</p></div>
+          </div>
+          <div class="step" data-i="2">
+            <div class="step-n">03</div>
+            <div><div class="step-t">改纸为竹</div><p class="step-d">陈鱼门「感纸牌有诸多不便」，改竹骨。厚度有了，手感有了，声音也有了。</p></div>
+          </div>
+          <div class="step" data-i="3">
+            <div class="step-n">04</div>
+            <div><div class="step-t">定型 136 张</div><p class="step-d">继承万索筒 108，改三箭 12，增四风 16。此后一百六十年，基本没再变过。</p></div>
+          </div>
+        </div>
+
+        <button class="btn btn-line btn-sm" id="auto">自动播放 3 秒</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 136 张怎么来的 ========== -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span>COMPOSITION</span><span class="zh">136 张的构成</span></div>
+      <h2 class="sec-title"><span class="num">108 + 12 + 16</span>不是发明，是收束</h2>
+      <p class="sec-lead">网上常见的「108 + 16 + 12 + 8」是笼统说法。按馆方展板的路径，顺序其实是：先继承 108，再改 12，最后增 16，花牌 8 张是后人所加。</p>
+    </div>
+
+    <div class="compose">
+      <div class="reveal">
+        <div class="count-big"><span id="count">108</span><small>张</small></div>
+        <div class="bar" id="bar">
+          <div class="b1 show" style="flex:108" id="s1">万 · 索 · 筒 108</div>
+          <div class="b2" style="flex:0" id="s2"></div>
+          <div class="b3" style="flex:0" id="s3"></div>
+          <div class="b4" style="flex:0" id="s4"></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:#E6D6BA"></i>序数牌 108</span>
+          <span><i style="background:#C4573F"></i>三箭 12</span>
+          <span><i style="background:#5C7A63"></i>四风 16</span>
+          <span><i style="background:#9A7D4A"></i>花牌 8</span>
+        </div>
+        <p style="font-size:13px;color:var(--ivory-2);line-height:1.9;margin-top:22px;max-width:44ch" id="composeNote">
+          继承碰和牌中的万、索、筒，共一百零八张。这是整副牌里唯一「原封不动」的部分。
+        </p>
+      </div>
+
+      <div class="compose-steps reveal" data-d="1" id="csteps">
+        <button class="cs on" data-i="0"><b>继承碰和牌</b><span>108 张</span></button>
+        <button class="cs" data-i="1"><b>改红花为绿发<br>白花为白板<br>老千为红中</b><span>+12 = 120</span></button>
+        <button class="cs" data-i="2"><b>增东南西北四风</b><span>+16 = 136</span></button>
+        <button class="cs" data-i="3"><b>后人加花牌</b><span>+8 = 144</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--tight">
+  <div class="wrap">
+    <blockquote class="quote reveal" style="max-width:830px">
+      「先生久玩纸牌，深谙此道，又感纸牌有诸多不便，于同治三年（1864）改为竹骨。」
+      <cite>《陈鱼门先生传略》展板 · 天一阁麻将起源地陈列馆</cite>
+    </blockquote>
+    <p style="font-size:12.5px;color:var(--ivory-3);margin-top:22px;max-width:62ch" class="reveal">
+      注意这句话的因果：不是「发明」，是「不便」。所有真实的产品改良都长这样——先有一个具体的麻烦，再有一个具体的解法。
+    </p>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="wrap" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;width:100%">
+  <span>天一阁 · 数智幻境 ／ demo-03 · 纸变竹</span>
+  <span>材质为 CSS 3D 分层模拟 · 可直接替换为实拍贴图</span>
+</div></footer>
+
+<script src="assets/store.js"></script>
+<script src="assets/tiles.js"></script>
+<script>
+(function(){
+  /* ---------------- 3D 分层牌 ---------------- */
+  var tile = document.getElementById('tile3');
+  document.getElementById('faceSvg').innerHTML = Tiles.svg({suit:'tong',num:5});
+
+  var cur = 0, target = 0, raf = null;
+  function paint(t){
+    // 厚度：纸 2px → 竹骨 56px
+    tile.style.setProperty('--th', (2 + t * 54).toFixed(1) + 'px');
+    // 侧面与背面颜色：纸黄 → 竹青
+    var r = Math.round(228 - t * 158), g = Math.round(214 - t * 117), b = Math.round(188 - t * 109);
+    tile.style.setProperty('--edge', 'rgb(' + r + ',' + g + ',' + b + ')');
+    document.getElementById('curl').style.opacity = Math.max(0, 1 - t * 2.6);
+    document.getElementById('fiber').style.opacity = (0.5 * Math.max(0, 1 - t * 2)).toFixed(2);
+    document.getElementById('grain').style.opacity = (0.16 + t * 0.55).toFixed(2);
+    document.getElementById('pct').textContent = Math.round(t * 100) + '%';
+
+    var si = t < .22 ? 0 : t < .52 ? 1 : t < .82 ? 2 : 3;
+    document.querySelectorAll('.step').forEach(function(el){
+      el.classList.toggle('on', +el.dataset.i === si);
+    });
+  }
+  function loop(){
+    cur += (target - cur) * 0.14;
+    if(Math.abs(target - cur) < 0.002){ cur = target; paint(cur); raf = null; return; }
+    paint(cur); raf = requestAnimationFrame(loop);
+  }
+  function go(v){
+    target = v / 100;
+    if(!raf) raf = requestAnimationFrame(loop);
+  }
+
+  var slider = document.getElementById('slider');
+  slider.addEventListener('input', function(){ go(+this.value); });
+  slider.addEventListener('change', function(){ TY.track('定·纸变竹','拖动材质',{v:+this.value}); });
+
+  var autoBtn = document.getElementById('auto');
+  autoBtn.addEventListener('click', function(){
+    var t0 = performance.now(), from = +slider.value;
+    (function tick(now){
+      var k = Math.min(1, (now - t0) / 3000);
+      var v = from + (100 - from) * (1 - Math.pow(1 - k, 3));
+      slider.value = v; go(v);
+      if(k < 1) requestAnimationFrame(tick);
+    })(t0);
+    TY.track('定·纸变竹','自动播放');
+  });
+
+  /* 拖动环绕 */
+  var stage = document.getElementById('stage3d');
+  var drag = false, sx = 0, sy = 0, ry = -26, rx = 16, bry = -26, brx = 16;
+  function setRot(){ tile.style.transform = 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)'; }
+  stage.addEventListener('pointerdown', function(e){
+    drag = true; sx = e.clientX; sy = e.clientY; bry = ry; brx = rx;
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener('pointermove', function(e){
+    if(!drag) return;
+    ry = bry + (e.clientX - sx) * 0.35;
+    rx = Math.max(-28, Math.min(42, brx - (e.clientY - sy) * 0.25));
+    setRot();
+  });
+  stage.addEventListener('pointerup', function(){ drag = false; });
+  stage.addEventListener('pointercancel', function(){ drag = false; });
+  stage.addEventListener('dblclick', function(){ ry = -26; rx = 16; setRot(); });
+
+  /* ---------------- 136 构成 ---------------- */
+  var NOTES = [
+    '继承碰和牌中的万、索、筒，共一百零八张。这是整副牌里唯一「原封不动」的部分。',
+    '把红花、白花、老千分别改为绿发、白板、红中，合称「三箭」，各四张共十二张。改的是名字，留下的是颜色。',
+    '增东、南、西、北「四风」，各四张共十六张。风牌同时指向天、船、座次三件事。',
+    '花牌春、夏、秋、冬与梅、兰、竹、菊共八张，为后人所增——标准牌面到 136 张就停住了，花牌是后来的自由发挥。'
+  ];
+  var TOTALS = [108, 120, 136, 144];
+  var WIDTHS = [[1,0,0,0],[1,.09,0,0],[1,.09,.13,0],[1,.08,.11,.055]];
+  var countEl = document.getElementById('count');
+  var shown = 108, animId = null;
+
+  function countTo(v){
+    cancelAnimationFrame(animId);
+    var from = shown, t0 = performance.now();
+    (function step(now){
+      var k = Math.min(1, (now - t0) / 420);
+      shown = Math.round(from + (v - from) * (1 - Math.pow(1 - k, 3)));
+      countEl.textContent = shown;
+      if(k < 1) animId = requestAnimationFrame(step);
+    })(t0);
+  }
+
+  function compose(i){
+    document.querySelectorAll('.cs').forEach(function(el){ el.classList.toggle('on', +el.dataset.i === i); });
+    countTo(TOTALS[i]);
+    document.getElementById('composeNote').textContent = NOTES[i];
+    var w = WIDTHS[i];
+    var s1 = document.getElementById('s1'), s2 = document.getElementById('s2'),
+        s3 = document.getElementById('s3'), s4 = document.getElementById('s4');
+    s1.style.flex = 108;
+    s2.style.flex = w[1] ? 12 : 0;
+    s3.style.flex = w[2] ? 16 : 0;
+    s4.style.flex = w[3] ? 8 : 0;
+    s2.textContent = w[1] ? '+12' : '';
+    s3.textContent = w[2] ? '+16' : '';
+    s4.textContent = w[3] ? '+8' : '';
+    [s2,s3,s4].forEach(function(el){ el.classList.toggle('show', !!el.style.flex && el.style.flex !== '0'); });
+    TY.track('定·纸变竹','查看构成',{step:i});
+  }
+  document.getElementById('csteps').addEventListener('click', function(e){
+    var b = e.target.closest('.cs'); if(!b) return;
+    compose(+b.dataset.i);
+  });
+
+  paint(0); setRot(); compose(0);
+  TY.track('定·纸变竹','进入页面');
+})();
+</script>
+</body>
+</html>

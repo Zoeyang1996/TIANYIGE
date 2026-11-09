@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>天一阁 · 数智幻境 ｜ 交互演示集与制作计划</title>
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+/* ---------- 首屏 ---------- */
+.hero{padding:140px 0 60px;position:relative;overflow:hidden}
+.hero::after{
+  content:"";position:absolute;right:-6%;top:6%;width:46%;height:120%;
+  background:radial-gradient(50% 50% at 50% 50%, rgba(161,58,44,.16), transparent 70%);
+  pointer-events:none;
+}
+.hero-meta{display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin-bottom:26px;font-size:11.5px;letter-spacing:.14em;color:var(--ivory-3)}
+.hero-meta .sep{width:1px;height:11px;background:var(--ivory-4)}
+.hero .h1{font-size:clamp(38px,6vw,74px);letter-spacing:.04em}
+.hero .h1 em{font-style:normal;color:var(--red-l)}
+.hero .lead{margin:26px 0 34px;max-width:56ch}
+.hero-acts{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+.hero-jump{
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:22px;
+  padding-top:18px;border-top:1px solid var(--line-2);
+}
+.hero-jump .lb{font-size:10.5px;letter-spacing:.16em;color:var(--ivory-3);margin-right:6px}
+.hero-jump a{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ivory-2);
+  padding:5px 10px;border:1px solid var(--line-2);border-radius:2px;transition:.25s;
+}
+.hero-jump a:hover{border-color:rgba(243,234,218,.3);color:var(--ivory);background:rgba(243,234,218,.05)}
+.hero-jump a i{font-style:normal;font-family:Menlo,monospace;font-size:9.5px;color:var(--gold)}
+
+.hero-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);margin-top:64px;
+}
+.hs{background:rgba(22,33,29,.6);padding:22px 22px 20px}
+.hs b{display:block;font-family:var(--serif);font-size:34px;font-weight:500;line-height:1}
+.hs b em{font-style:normal;font-size:.42em;color:var(--gold);margin-left:5px;letter-spacing:.1em}
+.hs span{display:block;font-size:11px;letter-spacing:.14em;color:var(--ivory-3);margin-top:10px}
+
+/* ---------- 定位 ---------- */
+.pos{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.pos p{font-size:14.5px;line-height:2;color:var(--ivory-2);margin:0 0 16px}
+.pos p b{color:var(--ivory);font-weight:500}
+.layers{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line)}
+.ly{background:var(--ink);padding:20px 22px;display:grid;grid-template-columns:64px 1fr;gap:16px;align-items:start}
+.ly .k{font-family:var(--serif);font-size:11px;letter-spacing:.16em;color:var(--gold);padding-top:3px}
+.ly .v b{display:block;font-family:var(--serif);font-size:16px;font-weight:500;margin-bottom:4px;letter-spacing:.04em}
+.ly .v span{font-size:12.5px;color:var(--ivory-2);line-height:1.8}
+
+/* ---------- demo 矩阵 ---------- */
+.mx{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.mcard{
+  border:1px solid var(--line);border-radius:3px;padding:22px;display:flex;flex-direction:column;
+  background:linear-gradient(170deg,rgba(243,234,218,.05),rgba(243,234,218,.012));
+  transition:.4s var(--ease);position:relative;overflow:hidden;
+}
+.mcard:hover{transform:translateY(-3px);border-color:rgba(243,234,218,.3)}
+.mcard::before{content:"";position:absolute;left:0;top:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),transparent);opacity:0;transition:.4s}
+.mcard:hover::before{opacity:1}
+.mc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.mc-no{font-family:Menlo,monospace;font-size:10.5px;color:var(--gold);letter-spacing:.1em}
+.mc-t{font-family:var(--serif);font-size:20px;letter-spacing:.05em;margin:0 0 8px}
+.mc-d{font-size:12.8px;color:var(--ivory-2);line-height:1.82;margin:0 0 14px;min-height:4.6em}
+.mc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px}
+.mc-f{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:auto;padding-top:14px;border-top:1px solid var(--line-2);font-size:11.5px;color:var(--ivory-3)}
+.mc-f .own{letter-spacing:.08em}
+.mc-open{color:var(--red-l);letter-spacing:.1em}
+.mcard .go-arrow{position:absolute;right:18px;bottom:16px;font-size:11px;color:var(--ivory-3)}
+.mc-crit{max-height:0;overflow:hidden;transition:max-height .45s var(--ease);font-size:12px;color:var(--ivory-2);line-height:1.8}
+.mc-crit.open{max-height:260px}
+.mc-crit div{padding-top:12px;margin-top:12px;border-top:1px dashed var(--line)}
+.crit-btn{background:none;border:0;border-bottom:1px dotted var(--ivory-3);color:var(--ivory-3);font-size:11px;padding:0 0 1px}
+.crit-btn:hover{color:var(--ivory);border-color:var(--ivory)}
+
+/* ---------- 素材表 ---------- */
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px}
+.tbl-wrap{overflow-x:auto}
+.tbl td{font-size:12.5px}
+.st{display:inline-flex;align-items:center;gap:5px;font-size:11px;letter-spacing:.06em}
+.st i{width:5px;height:5px;border-radius:50%;display:block}
+.st.ok{color:#9DBFAB}.st.ok i{background:#7FB08F}
+.st.miss{color:#E2A091}.st.miss i{background:#C4573F}
+.st.doing{color:#D6B87E}.st.doing i{background:#9A7D4A}
+.tbl tr.hide{display:none}
+
+/* ---------- 甘特 ---------- */
+.gantt-box{border:1px solid var(--line);border-radius:3px;overflow-x:auto;overflow-y:hidden;background:rgba(15,24,21,.28)}
+.gantt{min-width:940px;padding:18px 20px 22px;position:relative}
+.g-guides{position:absolute;left:20px;right:20px;top:0;bottom:0;pointer-events:none;z-index:0}
+.g-guides i{position:absolute;top:46px;bottom:42px;border-left:1px dashed rgba(154,125,74,.28)}
+.g-ms{z-index:2}
+.g-head{display:grid;grid-template-columns:196px 1fr;gap:14px;margin-bottom:8px}
+.g-days{display:grid;grid-template-columns:repeat(21,1fr);font-size:9px;color:var(--ivory-3);letter-spacing:.02em;text-align:center}
+.g-days span{padding:3px 0}
+.g-days span.we{color:rgba(196,87,63,.75)}
+.g-row{display:grid;grid-template-columns:196px 1fr;gap:14px;align-items:center;height:34px}
+.g-lb{font-size:12px;color:var(--ivory-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;justify-content:space-between;gap:8px}
+.g-lb em{font-style:normal;font-size:10px;color:var(--ivory-3);letter-spacing:.06em;flex-shrink:0}
+.g-track{position:relative;height:100%;background:
+  repeating-linear-gradient(90deg, rgba(243,234,218,.05) 0 1px, transparent 1px calc(100%/21));
+  border-radius:2px;
+}
+.g-bar{
+  position:absolute;top:9px;height:15px;border-radius:2px;cursor:pointer;
+  background:linear-gradient(90deg,rgba(161,58,44,.85),rgba(196,87,63,.7));
+  transition:transform .25s,box-shadow .25s,filter .25s;
+  overflow:hidden;
+}
+.g-bar:hover{transform:translateY(-1px) scaleY(1.18);box-shadow:0 6px 16px -6px rgba(0,0,0,.8);filter:brightness(1.15)}
+.g-bar.ph2{background:linear-gradient(90deg,rgba(62,90,72,.9),rgba(110,143,120,.75))}
+.g-bar.ph3{background:linear-gradient(90deg,rgba(154,125,74,.9),rgba(186,158,104,.72))}
+.g-bar b{position:absolute;inset:0;display:flex;align-items:center;padding-left:7px;font-size:9.5px;font-weight:400;color:rgba(255,248,238,.9);letter-spacing:.04em;white-space:nowrap}
+.g-ms{position:relative;height:30px;margin-top:6px}
+.g-ms .pin{
+  position:absolute;top:0;transform:translateX(-50%);text-align:center;font-size:9.5px;color:var(--gold);
+  white-space:nowrap;cursor:default;
+}
+.g-ms .pin::after{content:"";display:block;width:1px;height:7px;background:var(--gold);margin:3px auto 0;opacity:.6}
+.g-ms .pin b{display:block;font-weight:400;font-family:Menlo,monospace;font-size:9px;color:var(--ivory-3)}
+.ms-list{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}
+.ms{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:2px;background:rgba(243,234,218,.02)}
+.ms input{margin-top:3px;accent-color:#A13A2C;width:13px;height:13px;flex-shrink:0;cursor:pointer}
+.ms-l{font-size:11.5px;line-height:1.6}
+.ms-l b{display:block;color:var(--ivory);font-weight:400;font-size:12.5px}
+.ms-l span{color:var(--ivory-3);font-size:10.5px;letter-spacing:.06em}
+.ms.done .ms-l b{color:var(--ivory-3);text-decoration:line-through}
+
+/* ---------- 逐日 ---------- */
+.wk{border:1px solid var(--line);border-radius:3px;margin-bottom:10px;overflow:hidden;background:rgba(243,234,218,.02)}
+.wk-h{width:100%;display:flex;justify-content:space-between;align-items:center;gap:14px;background:none;border:0;padding:16px 20px;text-align:left;transition:.25s}
+.wk-h:hover{background:rgba(243,234,218,.035)}
+.wk-h b{font-family:var(--serif);font-size:15.5px;font-weight:500;letter-spacing:.06em;color:var(--ivory)}
+.wk-h span{font-size:11px;color:var(--ivory-3);letter-spacing:.1em}
+.wk-h .ar{color:var(--gold);font-size:12px;transition:transform .35s}
+.wk.open .wk-h .ar{transform:rotate(90deg)}
+.wk-b{display:none;border-top:1px solid var(--line-2)}
+.wk.open .wk-b{display:block}
+.day{display:grid;grid-template-columns:112px 1fr 88px;gap:16px;padding:15px 20px;border-bottom:1px solid var(--line-2);align-items:start;transition:.35s}
+.day:last-child{border-bottom:0}
+.day:hover{background:rgba(243,234,218,.025)}
+.day.focus{background:rgba(161,58,44,.10)}
+.day.ms .d-no b::after{content:" ★";color:var(--gold)}
+.d-no{font-family:Menlo,monospace;font-size:11px;color:var(--ivory-3);letter-spacing:.06em;padding-top:2px}
+.d-no b{display:block;color:var(--ivory);font-family:var(--serif);font-size:13px;font-weight:500;letter-spacing:.1em;margin-bottom:3px}
+.d-body b{font-size:13.5px;font-weight:500;color:var(--ivory);display:block;margin-bottom:3px}
+.d-body p{margin:0;font-size:12px;color:var(--ivory-2);line-height:1.75}
+.d-body p em{font-style:normal;color:var(--ivory-3)}
+.d-owner{font-size:10.5px;color:var(--gold);letter-spacing:.1em;text-align:right;padding-top:3px}
+.prog{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-size:11.5px;color:var(--ivory-3)}
+.prog .bar{width:180px;height:4px;background:rgba(243,234,218,.1);border-radius:2px;overflow:hidden}
+.prog .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8E3527,#C4573F);transition:width .6s}
+
+/* ---------- 分工 ---------- */
+.roles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.role{border:1px solid var(--line);border-radius:3px;padding:20px;background:linear-gradient(170deg,rgba(243,234,218,.045),transparent)}
+.role .rk{font-family:var(--serif);font-size:13px;color:var(--gold);letter-spacing:.16em;margin-bottom:6px}
+.role h4{font-family:var(--serif);font-size:17px;margin:0 0 10px;font-weight:500}
+.role p{font-size:12px;color:var(--ivory-2);line-height:1.8;margin:0 0 12px}
+.role .rp{font-size:10.5px;color:var(--ivory-3);line-height:1.8;border-top:1px solid var(--line-2);padding-top:10px}
+.role .rp b{color:var(--ivory-2);font-weight:400}
+
+/* ---------- 演示动线 ---------- */
+.run{display:grid;grid-template-columns:300px 1fr;gap:34px;align-items:start}
+.run-list{display:flex;flex-direction:column;gap:2px}
+.run-i{
+  text-align:left;background:none;border:0;border-left:1px solid var(--line);
+  padding:11px 14px;transition:.3s;display:flex;gap:12px;align-items:baseline;
+}
+.run-i:hover{background:rgba(243,234,218,.04)}
+.run-i.on{border-left-color:var(--red-l);background:linear-gradient(90deg,rgba(161,58,44,.14),transparent)}
+.run-i .tm{font-family:Menlo,monospace;font-size:10.5px;color:var(--gold);flex-shrink:0}
+.run-i .nm{font-size:12.8px;color:var(--ivory-2)}
+.run-i.on .nm{color:var(--ivory)}
+.run-stage{border:1px solid var(--line);border-radius:3px;padding:30px;min-height:250px;background:linear-gradient(170deg,rgba(243,234,218,.05),rgba(243,234,218,.012))}
+.run-stage .no{font-size:10.5px;letter-spacing:.2em;color:var(--gold);margin-bottom:10px}
+.run-stage h3{font-family:var(--serif);font-size:24px;margin:0 0 14px;letter-spacing:.05em}
+.run-stage p{font-size:14px;line-height:1.95;color:var(--ivory-2);margin:0 0 16px}
+.run-stage .script{font-family:var(--serif);font-size:15px;line-height:1.95;color:var(--ivory);border-left:1px solid rgba(161,58,44,.55);padding-left:16px;margin:0 0 18px}
+.run-stage .lk{display:flex;gap:8px;flex-wrap:wrap}
+.run-nav{display:flex;gap:8px;margin-top:18px}
+
+/* ---------- 风险 ---------- */
+.risk td:first-child{color:var(--ivory);white-space:nowrap}
+.risk td:nth-child(2){color:#D6B87E}
+
+@media(max-width:1080px){
+  .mx{grid-template-columns:1fr 1fr}
+  .roles{grid-template-columns:repeat(2,1fr)}
+  .hero-jump{
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:22px;
+  padding-top:18px;border-top:1px solid var(--line-2);
+}
+.hero-jump .lb{font-size:10.5px;letter-spacing:.16em;color:var(--ivory-3);margin-right:6px}
+.hero-jump a{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ivory-2);
+  padding:5px 10px;border:1px solid var(--line-2);border-radius:2px;transition:.25s;
+}
+.hero-jump a:hover{border-color:rgba(243,234,218,.3);color:var(--ivory);background:rgba(243,234,218,.05)}
+.hero-jump a i{font-style:normal;font-family:Menlo,monospace;font-size:9.5px;color:var(--gold)}
+
+.hero-strip{grid-template-columns:repeat(2,1fr)}
+  .pos{grid-template-columns:1fr;gap:32px}
+  .run{grid-template-columns:1fr}
+  .ms-list{grid-template-columns:1fr 1fr}
+}
+@media(max-width:720px){
+  .mx{grid-template-columns:1fr}
+  .roles{grid-template-columns:1fr}
+  .day{grid-template-columns:1fr;gap:6px}
+  .d-owner{text-align:left}
+  .ms-list{grid-template-columns:1fr}
+  .hero{padding-top:110px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">天</span><span>天一阁 · 数智幻境</span></a>
+  <nav class="topnav">
+    <a href="#demos">演示</a>
+    <a href="#assets">素材</a>
+    <a href="#timeline">排期</a>
+    <a href="#roles">分工</a>
+    <a href="#runthrough">今晚</a>
+    <a href="#risk">风险</a>
+  </nav>
+  <a class="back" href="demo-01-paiqiang.html">开始演示 →</a>
+</header>
+
+<main>
+<!-- ================= 首屏 ================= -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-meta reveal">
+      <span>交互演示集 v1.0</span><span class="sep"></span>
+      <span>2026.11</span><span class="sep"></span>
+      <span>数字媒体技术 · 第三组</span><span class="sep"></span>
+      <span>浙江省职业院校技能大赛 · 新一代信息技术赛道</span>
+    </div>
+    <h1 class="h1 reveal" data-d="1">天一阁 · <em>数智幻境</em></h1>
+    <p class="lead reveal" data-d="2">
+      以「一副牌的诞生」为叙事线，把一座藏书楼里的麻将陈列馆，做成七个可以点、可以翻、可以生成、可以统计的交互页面。
+      今晚用它讲思路，未来三周用它做交付。
+    </p>
+    <div class="hero-acts reveal" data-d="3">
+      <a class="btn" href="demo-01-paiqiang.html">从序章开始 <span style="opacity:.65">→</span></a>
+      <a class="btn btn-line" href="#timeline">看三周排期</a>
+      <a class="btn btn-line" href="demo-07-dashboard.html">看数据看板</a>
+    </div>
+
+    <div class="hero-strip reveal" data-d="4">
+      <div class="hs"><b>7<em>个</em></b><span>独立可运行页面</span></div>
+      <div class="hs"><b>21<em>天</em></b><span>内容交付 + 参赛训练</span></div>
+      <div class="hs"><b>5<em>人</em></b><span>四学生 + 指导教师</span></div>
+      <div class="hs"><b>0<em>外链</em></b><span>零依赖 · 断网可演示</span></div>
+    </div>
+
+    <div class="hero-jump reveal" data-d="5">
+      <span class="lb">七页直达</span>
+      <a href="demo-01-paiqiang.html"><i>01</i>序 · 牌墙</a>
+      <a href="demo-02-paimian.html"><i>02</i>解 · 牌面密码</a>
+      <a href="demo-03-zhibianzhu.html"><i>03</i>定 · 纸变竹</a>
+      <a href="demo-04-hangxian.html"><i>04</i>传 · 寰宇四方</a>
+      <a href="demo-05-wodepaimian.html"><i>05</i>续 · 我的牌面</a>
+      <a href="demo-06-shucang.html"><i>06</i>藏 · 三级索引</a>
+      <a href="demo-07-dashboard.html"><i>07</i>观 · 数据看板</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 定位 ================= -->
+<section class="sec" id="pos">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span>POSITIONING</span><span class="zh">一页看懂</span></div>
+      <h2 class="sec-title"><span class="num">01</span>我们不做「线上展馆」，做一次可被验证的叙事</h2>
+      <p class="sec-lead">同类作品普遍「重技术轻叙事」：全景漫游很沉浸，但信息密度低、记不住。我们反着来——轻量交互，强叙事，重点场景做三维，其余用 CSS 与 SVG 解决。</p>
+    </div>
+
+    <div class="pos">
+      <div class="reveal">
+        <p><b>一句话定位：</b>一座可以「摸牌」的线上麻将陈列馆——用一副牌的诞生，讲一座港口城市如何影响了世界的娱乐方式。</p>
+        <p><b>为什么是麻将：</b>文化唯一性（国内唯一麻将专题馆）、叙事完整度（起源—定型—传播三段式）、素材丰度（竹骨象牙玉石、筒索万图形、朱红墨绿象牙白）、交互契合度（牌面即按钮，牌墙即列表）。这四点让它比一个「虚拟车展」更适合做成可交互的东西。</p>
+        <p><b>为什么是现在这套做法：</b>七个页面全部是原生 HTML/CSS/JS，没有构建工具、没有 CDN、没有网络请求。这意味着两件事：今晚可以直接双击打开演示；三周内五个人可以并行开发而不互相阻塞。</p>
+        <p><b>与参赛项目的接口：</b>「几何—数据—行为」三层孪生在这里各有一个落点——牌墙与材质负责几何与材质表现，三级索引负责数据孪生，牌面解码与我的牌面负责行为交互，数据看板把三者串成闭环。</p>
+      </div>
+
+      <div class="layers reveal" data-d="1">
+        <div class="ly">
+          <div class="k">几何层</div>
+          <div class="v"><b>看得见</b><span>牌墙 144 张、竹骨材质分层、祠堂空间的光影调性。对应任务清单第二阶段：1:1 重建与材质还原。</span></div>
+        </div>
+        <div class="ly">
+          <div class="k">数据层</div>
+          <div class="v"><b>查得到</b><span>场景—书柜—书册三级编号与坐标绑定，点选调档、档案反查。对应第三阶段新增的三项核心任务。</span></div>
+        </div>
+        <div class="ly">
+          <div class="k">行为层</div>
+          <div class="v"><b>玩得动</b><span>翻牌、解码、拖动材质、点航线、生成牌面卡。每一个动作都埋点，都进看板。</span></div>
+        </div>
+        <div class="ly">
+          <div class="k">闭环</div>
+          <div class="v"><b>越用越准</b><span>互动 → 沉淀 → 洞察 → 改内容。看板上的热度与转化，就是下一轮内容调整的依据。</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= demo 矩阵 ================= -->
+<section class="sec" id="demos">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span>DEMOS</span><span class="zh">七个可运行页面 · 预期目标与验收</span></div>
+      <h2 class="sec-title"><span class="num">02</span>每个页面只干一件事</h2>
+      <p class="sec-lead">点开任一卡片即可单独演示；点「验收标准」看这一页要做到什么程度才算过。八个模块里七个已可运行，第一个「谱系」为备选。</p>
+    </div>
+
+    <div class="mx" id="mx"></div>
+  </div>
+</section>
+
+<!-- ================= 素材 ================= -->
+<section class="sec" id="assets">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span>ASSETS</span><span class="zh">素材清单 · 用途与分工</span></div>
+      <h2 class="sec-title"><span class="num">03</span>十六项素材，五项还没有</h2>
+      <p class="sec-lead">实拍十二组是独家资产，别人抄不走；缺的五项里，方言录音与书目数据是硬缺口，必须在第 12 天前落地，否则答辩时讲不圆。</p>
+    </div>
+
+    <div class="filters reveal" id="assetFilter">
+      <button class="chip on" data-f="all"><span class="dot"></span>全部 16</button>
+      <button class="chip" data-f="ok">已有 9</button>
+      <button class="chip" data-f="miss">待采集 5</button>
+      <button class="chip" data-f="doing">进行中 2</button>
+    </div>
+
+    <div class="tbl-wrap reveal" data-d="1">
+      <table class="tbl" id="assetTbl">
+        <thead><tr>
+          <th style="width:64px">编号</th><th>素材</th><th>用在哪一页</th><th style="width:88px">类型</th><th style="width:70px">负责</th><th style="width:60px">截止</th><th style="width:80px">状态</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p style="font-size:11.5px;color:var(--ivory-3);margin-top:16px;line-height:1.9" class="reveal">
+      编号 S01—S12 为实地拍摄（原创），01—15 为网络自由授权图（CC / 公共领域），N 为新采集项，L 为授权与合规项。
+      实拍与展板文字对外发布前须与馆方宣教部门沟通使用范围；CC BY-SA 类素材需以相同协议共享并署名。
+    </p>
+  </div>
+</section>
+
+<!-- ================= 排期 ================= -->
+<section class="sec" id="timeline">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span>ROADMAP</span><span class="zh">21 天 · 甘特与逐日任务</span></div>
+      <h2 class="sec-title"><span class="num">04</span>18 天交付，3 天进训练</h2>
+      <p class="sec-lead">第 1 天是今天。悬停甘特条看详情，点击可高亮对应日期的任务；里程碑可勾选，进度会记在本机。</p>
+    </div>
+
+    <div class="prog reveal">
+      <span>里程碑完成度</span>
+      <span class="bar"><i id="progBar"></i></span>
+      <span id="progTxt">0 / 7</span>
+    </div>
+
+    <div class="gantt-box reveal" data-d="1">
+      <div class="gantt">
+        <div class="g-head">
+          <div style="font-size:10px;letter-spacing:.14em;color:var(--ivory-3);padding-top:4px">阶段 / 负责人</div>
+          <div class="g-days" id="gDays"></div>
+        </div>
+        <div id="gRows"></div>
+        <div class="g-guides" id="gGuides"></div>
+        <div class="g-ms" id="gMs"></div>
+      </div>
+    </div>
+
+    <div class="ms-list reveal" id="msList"></div>
+
+    <div style="margin-top:34px" id="weeks"></div>
+  </div>
+</section>
+
+<!-- ================= 分工 ================= -->
+<section class="sec" id="roles">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span>TEAM</span><span class="zh">四名学生 + 指导教师</span></div>
+      <h2 class="sec-title"><span class="num">05</span>分工按「层」切，不按「页」切</h2>
+      <p class="sec-lead">按页面分工，五个人会卡在同一个文件上。按孪生层分工，每个人有自己的接口，页面只是他们成果的拼装结果。</p>
+    </div>
+    <div class="roles reveal">
+      <div class="role">
+        <div class="rk">学生 A</div><h4>场景与素材</h4>
+        <p>采集、空间、素材入库。负责牌墙的空间感与航线页的落点叙事。</p>
+        <div class="rp"><b>对应任务清单：</b>阶段一采集 + 阶段二建模<br><b>本周：</b>素材包 v1 · D11</div>
+      </div>
+      <div class="role">
+        <div class="rk">学生 B</div><h4>交互前端</h4>
+        <p>七个页面的交互实现与性能。所有可点的东西由他落地。</p>
+        <div class="rp"><b>对应任务清单：</b>阶段四交互 + 集成<br><b>本周：</b>牌墙 / 解码 / 生成器 · D12</div>
+      </div>
+      <div class="role">
+        <div class="rk">学生 C</div><h4>数据与看板</h4>
+        <p>数据结构、三级索引、埋点与统计。负责「数据孪生」这条唯一性。</p>
+        <div class="rp"><b>对应任务清单：</b>任务 8 / 9 / 10<br><b>本周：</b>索引 + 看板 · D15</div>
+      </div>
+      <div class="role">
+        <div class="rk">学生 D</div><h4>视觉与动效</h4>
+        <p>色彩、字体、材质、动效节奏。负责全站「看起来是一套东西」。</p>
+        <div class="rp"><b>对应任务清单：</b>阶段二材质 + 优化<br><b>本周：</b>视觉规范冻结 · D5</div>
+      </div>
+      <div class="role">
+        <div class="rk">教师 E</div><h4>内容与答辩</h4>
+        <p>史料校对、文案定稿、答辩脚本与模拟评审。守叙事线不跑偏。</p>
+        <div class="rp"><b>对应：</b>阶段六交付材料<br><b>本周：</b>文案定稿 · D3</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 今晚 ================= -->
+<section class="sec" id="runthrough">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span>TONIGHT</span><span class="zh">今晚 20 分钟怎么讲</span></div>
+      <h2 class="sec-title"><span class="num">06</span>先给结论，再给证据</h2>
+      <p class="sec-lead">学生最容易犯的错是从技术讲起。今晚的顺序是：一句话定位 → 一个问题 → 五个演示 → 一张排期表。每段都有可直接念的话术。</p>
+    </div>
+
+    <div class="run">
+      <div class="run-list reveal" id="runList"></div>
+      <div class="reveal" data-d="1">
+        <div class="run-stage" id="runStage"></div>
+        <div class="run-nav">
+          <button class="btn btn-line btn-sm" id="prevStep">← 上一步</button>
+          <button class="btn btn-sm" id="nextStep">下一步 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 风险 ================= -->
+<section class="sec" id="risk">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span>RISK</span><span class="zh">风险与降级</span></div>
+      <h2 class="sec-title"><span class="num">07</span>提前想好「砍哪里」</h2>
+      <p class="sec-lead">三周的项目一定会延期。区别在于：是延期时手忙脚乱，还是提前写好降级顺序。下面是我们的顺序。</p>
+    </div>
+    <div class="tbl-wrap reveal" data-d="1">
+      <table class="tbl risk">
+        <thead><tr><th style="width:120px">风险</th><th style="width:160px">影响</th><th>降级方案</th><th style="width:70px">负责</th></tr></thead>
+        <tbody>
+          <tr><td>现场断网 / 设备不兼容</td><td>演示直接中断</td><td>全站零外链，纯本地运行；准备 U 盘副本与关键页面截图，最差情况用图讲完。</td><td>A</td></tr>
+          <tr><td>低配机器掉帧</td><td>牌墙与材质动画卡顿</td><td>加「低配模式」开关：关视差、降牌数到 72、材质改用静态图。默认检测 CPU 核心数与 devicePixelRatio。</td><td>B</td></tr>
+          <tr><td>馆方素材授权未获批</td><td>不能用实拍图发布</td><td>第 10 天前完成沟通；未获批则对外版换用 CC 图 + 自绘 SVG，实拍仅用于校内答辩。</td><td>E</td></tr>
+          <tr><td>书目数据拿不到</td><td>三级索引只能演示</td><td>用示例数据并显式标注；答辩只讲「链路通了」，不承诺藏品数量。这是可接受的诚实。</td><td>C</td></tr>
+          <tr><td>进度落后 3 天以上</td><td>无法全部完成</td><td>砍序：航线动画 → 三级索引视觉 → 材质分层。保四个核心：牌墙、解码、我的牌面、看板。</td><td>A</td></tr>
+          <tr><td>第 3 周还在加功能</td><td>没有时间彩排</td><td>D18 硬性冻结。冻结后只改错别字与断链，不加任何新交互。这条没有例外。</td><td>E</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--tight">
+  <div class="wrap">
+    <blockquote class="quote reveal" style="max-width:820px">
+      技术会过时，故事不会。评委记不住你用了几个库，但会记住「原来一条是一隻鸟」。
+      <cite>留给三周后答辩现场的一句话</cite>
+    </blockquote>
+    <div class="grid g3" style="margin-top:44px">
+      <a class="card card--hover reveal" href="demo-01-paiqiang.html">
+        <div class="card-h"><span class="tag green">入口</span></div>
+        <h3 class="card-t">从序章开始</h3>
+        <p class="card-p">144 张牌墙，点任意一张看它从哪来。</p>
+      </a>
+      <a class="card card--hover reveal" data-d="1" href="demo-02-paimian.html">
+        <div class="card-h"><span class="tag green">核心</span></div>
+        <h3 class="card-t">牌面密码</h3>
+        <p class="card-p">翻牌看物象，14 条方言可点。</p>
+      </a>
+      <a class="card card--hover reveal" data-d="2" href="demo-07-dashboard.html">
+        <div class="card-h"><span class="tag green">闭环</span></div>
+        <h3 class="card-t">数据看板</h3>
+        <p class="card-p">前面所有点击，在这里变成证据。</p>
+      </a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="wrap" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;width:100%">
+  <span>天一阁 · 数智幻境 ／ 交互演示集 v1.0 · 2026.11</span>
+  <span>素材引自天一阁麻将起源地陈列馆展板 · 网络图 CC 授权</span>
+</div></footer>
+</div>
+
+<script src="assets/store.js"></script>
+<script>
+(function(){
+  /* ================= 数据 ================= */
+  var DEMOS = [
+    { no:'01', t:'序 · 牌墙', href:'demo-01-paiqiang.html', st:'已可运行',
+      d:'144 张牌铺满首屏，鼠标视差、按花色筛查、点牌出档案。负责在 3 秒内建立「这是一副真牌」的体感。',
+      tags:['SVG 绘制','视差','筛选'],
+      crit:'① 144 张全部由程序绘制，无图片；② 首屏加载 < 1s；③ 点击任意牌 200ms 内出面板；④ 断网可开。',
+      own:'B' },
+    { no:'02', t:'解 · 牌面密码', href:'demo-02-paimian.html', st:'已可运行',
+      d:'筒索万风箭五类牌面，翻过来是木桶、缆绳、钱串、帆、箭。配 14 条方言术语，可听读音。',
+      tags:['3D 翻转','Web Audio','方言'],
+      crit:'① 五类牌面均可翻；② 14 条方言全部可点；③ 翻牌有音效且默认不扰民；④ 术语点击后不跳页。',
+      own:'B / E' },
+    { no:'03', t:'定 · 纸变竹', href:'demo-03-zhibianzhu.html', st:'已可运行',
+      d:'拖动滑块，纸牌变成竹骨牌；可环绕观察厚度。下半段用计数动画讲 108 + 12 + 16 = 136。',
+      tags:['CSS 3D','材质','计数'],
+      crit:'① 滑块 0—100 全程无跳帧；② 厚度变化可肉眼分辨；③ 四个阶段文案随进度切换；④ 构成按钮与数字同步。',
+      own:'D / B' },
+    { no:'04', t:'传 · 寰宇四方', href:'demo-04-hangxian.html', st:'已可运行',
+      d:'宁波出发的四条航线，点击落点航线自动描出，故事卡随之更新。刻意用抽象航线图，不用世界地图。',
+      tags:['SVG 路径','叙事卡','依次播放'],
+      crit:'① 四条航线均可点；② 描线动画 1.5s 内完成；③ 依次播放不卡死、可中断；④ 不出现任何地理边界数据。',
+      own:'A / B' },
+    { no:'05', t:'续 · 我的牌面', href:'demo-05-wodepaimian.html', st:'已可运行',
+      d:'选字牌、材质、方言祝福，填落款，实时生成一张带编号的牌面卡，一键导出 PNG。',
+      tags:['Canvas','PNG 导出','UGC'],
+      crit:'① 三种材质视觉可辨；② 导出图 760×1040 且文字不糊；③ 编号按日递增不重复；④ 移动端可长按保存。',
+      own:'B' },
+    { no:'06', t:'藏 · 三级索引', href:'demo-06-shucang.html', st:'已可运行',
+      d:'场景—书柜—书册三级索引。点书脊出档案，按「反查」自动切柜、扫光、逐级点亮索书路径。',
+      tags:['数据孪生','检索','反查'],
+      crit:'① 22 条书目均可点；② 检索支持书名与著者；③ 反查跨柜时自动切换；④ 示例数据明确标注。',
+      own:'C' },
+    { no:'07', t:'观 · 数据看板', href:'demo-07-dashboard.html', st:'已可运行',
+      d:'读取七个页面的真实埋点：点位热度、转化漏斗、时段分布、实时事件流。',
+      tags:['埋点','漏斗','实时'],
+      crit:'① 跨页数据贯通；② 2.5s 自动刷新；③ 空状态有引导；④ 可清空、可模拟。',
+      own:'C' },
+    { no:'08', t:'源 · 博戏谱系', href:'#timeline', st:'备选待建',
+      d:'从六博到马吊的谱系图，可展开。文案与三块展板已备，交互尚未实现——这是第一个该被砍的模块。',
+      tags:['谱系图','待建'],
+      crit:'若要建：① 三块源流图结构准确；② 节点可展开到二级；③ 不与时间轴页重复。',
+      own:'E' }
+  ];
+
+  var mx = document.getElementById('mx');
+  DEMOS.forEach(function(d, i){
+    var el = document.createElement('div');
+    el.className = 'mcard reveal';
+    el.setAttribute('data-d', (i % 3));
+    var isLink = d.st === '已可运行';
+    el.innerHTML =
+      '<div class="mc-top"><span class="mc-no">DEMO ' + d.no + '</span>' +
+      '<span class="tag ' + (isLink ? 'green' : 'gold') + '">' + d.st + '</span></div>' +
+      '<h3 class="mc-t">' + d.t + '</h3>' +
+      '<p class="mc-d">' + d.d + '</p>' +
+      '<div class="mc-tags">' + d.tags.map(function(t){ return '<span class="chip" style="font-size:10.5px;padding:3px 8px">' + t + '</span>'; }).join('') + '</div>' +
+      '<div class="mc-f"><span class="own">负责 ' + d.own + '</span>' +
+      (isLink ? '<a class="mc-open" href="' + d.href + '">打开 →</a>' : '<span class="mc-open" style="color:var(--ivory-3)">待建</span>') + '</div>' +
+      '<button class="crit-btn" style="margin-top:12px;align-self:flex-start">验收标准 +</button>' +
+      '<div class="mc-crit"><div>' + d.crit + '</div></div>';
+    el.querySelector('.crit-btn').onclick = function(){
+      var c = el.querySelector('.mc-crit');
+      var open = c.classList.toggle('open');
+      this.textContent = open ? '收起 −' : '验收标准 +';
+    };
+    mx.appendChild(el);
+  });
+
+  /* ================= 素材 ================= */
+  var ASSETS = [
+    ['S01','花牌实拍：梅兰竹菊 / 春夏秋冬','切牌面解码 · 花牌','实拍','A','D11','ok'],
+    ['S09','「一条为鸟」实拍','解码页核心图 · 全站最有说服力的一张','实拍','A','D11','ok'],
+    ['S10','中庭地砖铭文（筒子牌）','筒子释义的直接引用','实拍','A','D11','ok'],
+    ['S11','《麻将中的宁波方言》展板','14 条术语脚本来源','实拍','E','D3','ok'],
+    ['S06','《陈鱼门先生传略》展板','纸变竹章节主图与引文','实拍','E','D3','ok'],
+    ['S03','《叶戏源流图》展板','谱系页（备选）','实拍','E','D6','ok'],
+    ['S08','《麻将的产生》与源流图','第三章开篇权威引文','实拍','E','D3','ok'],
+    ['S04','日本木制「渔樵耕读」牌','航线 · 日本 / 材质温度对照','实拍','A','D11','ok'],
+    ['S05','日本竹骨牌（E/S/W/N）','航线 · 日本物证','实拍','A','D11','ok'],
+    ['N01','展厅全景 / 中庭俯视','首屏背景与空间章节','待采集','A','D11','miss'],
+    ['N02','方言真人录音 14 条','解码页「听读音」按钮','待采集','E','D14','miss'],
+    ['N03','南洋牌具 / 牌局影像','航线 · 南洋落点','待采集','A','D18','miss'],
+    ['N04','竹林 / 木纹材质扫描','纸变竹贴图替换','待采集','D','D9','miss'],
+    ['N05','落牌 / 洗牌音效','全站交互音效','待采集','D','D9','miss'],
+    ['L01','馆方影像使用授权','对外发布与参赛提交','授权','E','D10','doing'],
+    ['L02','网络图 CC 协议标注','页脚致谢与版权页','授权','D','D18','doing']
+  ];
+  var tb = document.querySelector('#assetTbl tbody');
+  ASSETS.forEach(function(a){
+    var tr = document.createElement('tr');
+    tr.dataset.s = a[6];
+    var stTxt = a[6] === 'ok' ? '已有' : a[6] === 'miss' ? '待采集' : '进行中';
+    tr.innerHTML = '<td class="mono" style="color:var(--gold)">' + a[0] + '</td>' +
+      '<td><strong>' + a[1] + '</strong></td><td>' + a[2] + '</td>' +
+      '<td style="color:var(--ivory-3)">' + a[3] + '</td><td>' + a[4] + '</td>' +
+      '<td class="mono" style="color:var(--ivory-3)">' + a[5] + '</td>' +
+      '<td><span class="st ' + a[6] + '"><i></i>' + stTxt + '</span></td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('assetFilter').addEventListener('click', function(e){
+    var b = e.target.closest('[data-f]'); if(!b) return;
+    this.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
+    b.classList.add('on');
+    var f = b.dataset.f;
+    document.querySelectorAll('#assetTbl tbody tr').forEach(function(tr){
+      tr.classList.toggle('hide', f !== 'all' && tr.dataset.s !== f);
+    });
+  });
+
+  /* ================= 甘特 ================= */
+  var START = new Date(2026, 10, 9);          // 2026-11-09 周一
+  var WD = ['日','一','二','三','四','五','六'];
+  var N = 21;
+  function dayDate(d){ var x = new Date(START); x.setDate(x.getDate() + d - 1); return x; }
+  function md(d){ var x = dayDate(d); return (x.getMonth()+1) + '/' + String(x.getDate()).padStart(2,'0'); }
+
+  var gDays = document.getElementById('gDays');
+  for(var i = 1; i <= N; i++){
+    var dt = dayDate(i), we = (dt.getDay() === 0 || dt.getDay() === 6);
+    var s = document.createElement('span');
+    s.textContent = i;
+    if(we) s.className = 'we';
+    s.title = 'D' + i + ' · ' + md(i) + ' 周' + WD[dt.getDay()];
+    gDays.appendChild(s);
+  }
+
+  var TASKS = [
+    { n:'内容定稿 · 文案与史料', o:'E + A', a:1, b:3, ph:1 },
+    { n:'视觉定调 · 规范与组件', o:'D', a:2, b:5, ph:2 },
+    { n:'牌墙 + 牌面解码', o:'B', a:4, b:8, ph:1 },
+    { n:'纸变竹 + 136 计数', o:'D / B', a:6, b:9, ph:3 },
+    { n:'寰宇航线', o:'A / B', a:8, b:11, ph:3 },
+    { n:'我的牌面生成器', o:'B', a:9, b:12, ph:1 },
+    { n:'藏书三级索引', o:'C', a:10, b:14, ph:2 },
+    { n:'数据看板与埋点闭环', o:'C', a:12, b:15, ph:2 },
+    { n:'性能 · 跨端 · 大屏适配', o:'B / D', a:15, b:17, ph:3 },
+    { n:'联调 · 彩排 · 录屏', o:'A', a:16, b:18, ph:1 },
+    { n:'参赛训练 · 模拟评审', o:'全员', a:19, b:21, ph:2 }
+  ];
+  var gRows = document.getElementById('gRows');
+  TASKS.forEach(function(t, idx){
+    var row = document.createElement('div');
+    row.className = 'g-row';
+    var w = (t.b - t.a + 1) / N * 100;
+    var l = (t.a - 1) / N * 100;
+    row.innerHTML = '<div class="g-lb"><span>' + t.n + '</span><em>' + t.o + '</em></div>' +
+      '<div class="g-track"><div class="g-bar ph' + t.ph + '" data-a="' + t.a + '" data-b="' + t.b + '" ' +
+      'title="' + t.n + ' · D' + t.a + '—D' + t.b + ' · ' + t.o + '" ' +
+      'style="left:' + l + '%;width:' + w + '%"><b>' + (t.b - t.a >= 3 ? t.n : '') + '</b></div></div>';
+    gRows.appendChild(row);
+  });
+
+  var MS = [
+    { id:'M1', d:3,  t:'文案定稿' },
+    { id:'M2', d:5,  t:'视觉规范冻结' },
+    { id:'M3', d:8,  t:'首个可演示交互' },
+    { id:'M4', d:12, t:'六页可点' },
+    { id:'M5', d:15, t:'数据闭环打通' },
+    { id:'M6', d:18, t:'参赛版冻结' },
+    { id:'M7', d:21, t:'模拟评审通过' }
+  ];
+  var gMs = document.getElementById('gMs');
+  var gGuides = document.getElementById('gGuides');
+  MS.forEach(function(m){
+    var pos = 'calc((196px + 14px) + (100% - 210px) * ' + ((m.d - 0.5) / N) + ')';
+    var p = document.createElement('div');
+    p.className = 'pin';
+    p.style.left = pos;
+    p.innerHTML = m.id + '<b>D' + m.d + '</b>';
+    p.title = m.t + ' · ' + md(m.d);
+    gMs.appendChild(p);
+
+    var g = document.createElement('i');
+    g.style.left = pos;
+    gGuides.appendChild(g);
+  });
+
+  /* 里程碑勾选 */
+  var msList = document.getElementById('msList');
+  var saved = [];
+  try{ saved = JSON.parse(localStorage.getItem('tianyige.milestones') || '[]'); }catch(e){}
+  MS.forEach(function(m, i){
+    var row = document.createElement('label');
+    row.className = 'ms' + (saved.indexOf(m.id) > -1 ? ' done' : '');
+    row.innerHTML = '<input type="checkbox" ' + (saved.indexOf(m.id) > -1 ? 'checked' : '') + '>' +
+      '<span class="ms-l"><b>' + m.t + '</b><span>' + m.id + ' · D' + m.d + ' · ' + md(m.d) + '</span></span>';
+    row.querySelector('input').onchange = function(){
+      var list = [];
+      msList.querySelectorAll('.ms').forEach(function(x){
+        var cb = x.querySelector('input');
+        if(cb.checked){ list.push(x.querySelector('.ms-l span').textContent.split(' · ')[0]); x.classList.add('done'); }
+        else x.classList.remove('done');
+      });
+      try{ localStorage.setItem('tianyige.milestones', JSON.stringify(list)); }catch(e){}
+      updateProg();
+      TY.track('总览','勾选里程碑',{id:m.id, on:this.checked});
+    };
+    msList.appendChild(row);
+  });
+  function updateProg(){
+    var all = msList.querySelectorAll('.ms').length;
+    var done = msList.querySelectorAll('.ms.done').length;
+    document.getElementById('progBar').style.width = (done / all * 100) + '%';
+    document.getElementById('progTxt').textContent = done + ' / ' + all;
+  }
+  updateProg();
+
+  /* 甘特条点击 → 高亮对应日期 */
+  gRows.addEventListener('click', function(e){
+    var bar = e.target.closest('.g-bar'); if(!bar) return;
+    var a = +bar.dataset.a, b = +bar.dataset.b;
+    // 打开对应周
+    document.querySelectorAll('.wk').forEach(function(wk){
+      var ds = wk.querySelectorAll('.day');
+      var hit = false;
+      ds.forEach(function(d){
+        var n = +d.dataset.d;
+        var on = n >= a && n <= b;
+        d.classList.toggle('focus', on);
+        if(on) hit = true;
+      });
+      if(hit) wk.classList.add('open');
+    });
+    document.getElementById('timeline').scrollIntoView({ behavior:'smooth', block:'start' });
+    TY.track('总览','查看甘特任务',{from:a, to:b});
+  });
+
+  /* ================= 逐日 ================= */
+  var WEEKS = [
+    { w:'第一周', r:'11/09 — 11/15', sub:'定内容、定视觉、跑通前两个页面', days:[
+      ['D1','11/09','一','定选题边界与叙事主线','逐页确认「这页让用户知道什么」；确定八个 demo 的取舍与砍单顺序。','一页纸叙事线 + demo 清单','E / A'],
+      ['D2','11/10','二','整理馆方展板文案','产生、传略、方言、源流四类展板录入文案表，标注可直接引用的原文。','文案表 v1','E'],
+      ['D3','11/11','三','文案定稿会 ★','逐页过稿，凡是一页讲不清两件事的，直接砍。','文案表 v2（定稿）','全员','ms'],
+      ['D4','11/12','四','视觉规范起步','色板、字体、栅格、按钮与卡片样式；先落 CSS 变量，不做页面。','theme.css v1','D'],
+      ['D5','11/13','五','视觉规范冻结 ★','组件清单签字；此后颜色与字号不再讨论。牌墙首屏同步联调。','规范文档 + demo-01','D / B','ms'],
+      ['D6','11/14','六','牌面解码实现','五类牌面绘制、物象线描、14 条方言数据接入；翻牌动效调手感。','demo-02 可跑','B / E'],
+      ['D7','11/15','日','周复盘 + 素材补拍计划','核对素材缺口，确认补拍清单与授权沟通时间点。','缺口清单（含负责人）','A']
+    ]},
+    { w:'第二周', r:'11/16 — 11/22', sub:'四个页面并行，素材入库', days:[
+      ['D8','11/16','一','纸变竹 + 136 构成 ★','CSS 3D 分层厚度、滑块联动、四段文案同步；构成计数与条形图。','demo-03 可跑','D / B','ms'],
+      ['D9','11/17','二','寰宇航线','四条航线描线动画、故事卡、依次播放；材质与音效素材对接。','demo-04 可跑','A / B'],
+      ['D10','11/18','三','我的牌面生成器','Canvas 绘制、三种材质、编号规则、PNG 导出；移动端长按保存测试。','demo-05 可跑','B'],
+      ['D11','11/19','四','素材入库','实拍 12 组转 WebP、裁切、命名、授权标注；缺失项确认替代方案。','素材包 v1','A'],
+      ['D12','11/20','五','藏书三级索引 ★','数据结构、书脊渲染、点选调档、反查定位与检索。','demo-06 可跑','C','ms'],
+      ['D13','11/21','六','数据看板','统一埋点、热度与漏斗换算、实时事件流；空状态引导。','demo-07 可跑','C'],
+      ['D14','11/22','日','周复盘 + 全链路走查','从序章点到看板，记录所有卡顿、死链与讲不通的地方。','走查问题清单','A / 全员']
+    ]},
+    { w:'第三周', r:'11/23 — 11/29', sub:'联调、冻结、进入训练', days:[
+      ['D15','11/23','一','数据闭环验收 ★','模拟 20 位游客走完全程，确认跨页数据贯通、漏斗不为零。','闭环验收记录','C','ms'],
+      ['D16','11/24','二','性能优化','首屏 3 秒内、动画 50fps、低配模式开关；图片懒加载与压缩。','性能测试表','B / D'],
+      ['D17','11/25','三','跨端与大屏适配','1024 / 768 / 375 三档 + 现场投影比例；字号在 3 米外可读。','适配检查表','D'],
+      ['D18','11/26','四','参赛版冻结 ★','只修错别字与断链；产出 3 分钟录屏与 PPT 素材。','冻结版 + 录屏','A / E','ms'],
+      ['D19','11/27','五','答辩训练 1','8 分钟讲稿逐句掐表；删掉所有「然后」「就是」。','讲稿 v1','E'],
+      ['D20','11/28','六','模拟评审','按评分表打分，整理三个必被追问的问题及答法。','评审记录','全员'],
+      ['D21','11/29','日','修正与归档 ★','材料归档、链接校验、提交清单签字。','参赛提交包','A','ms']
+    ]}
+  ];
+
+  var weeksEl = document.getElementById('weeks');
+  WEEKS.forEach(function(w, wi){
+    var box = document.createElement('div');
+    box.className = 'wk' + (wi === 0 ? ' open' : '');
+    var head = document.createElement('button');
+    head.className = 'wk-h';
+    head.innerHTML = '<b>' + w.w + '　' + w.sub + '</b><span>' + w.r + ' <span class="ar">▸</span></span>';
+    head.onclick = function(){ box.classList.toggle('open'); };
+    box.appendChild(head);
+
+    var body = document.createElement('div');
+    body.className = 'wk-b';
+    w.days.forEach(function(d){
+      var row = document.createElement('div');
+      row.className = 'day' + (d[7] === 'ms' ? ' ms' : '');
+      row.dataset.d = d[0].replace('D','');
+      row.innerHTML = '<div class="d-no"><b>' + d[0] + '</b>' + d[1] + ' 周' + d[2] + '</div>' +
+        '<div class="d-body"><b>' + d[3] + '</b><p>' + d[4] + ' <em>交付：' + d[5] + '</em></p></div>' +
+        '<div class="d-owner">' + d[6] + '</div>';
+      body.appendChild(row);
+    });
+    box.appendChild(body);
+    weeksEl.appendChild(box);
+  });
+
+  /* ================= 演示动线 ================= */
+  var RUN = [
+    { tm:'0:00', nm:'开场 · 一句话定位', t:'先说结论', p:'不要从技术讲起。第一句话就要让学生知道我们要做什么、为什么值得做。',
+      s:'「我们要做的不是又一个线上展厅，而是一座可以摸牌的麻将陈列馆——用一副牌的诞生，讲一座港口城市怎么影响了全世界的娱乐方式。」',
+      link:[['index.html','总览'],['demo-01-paiqiang.html','牌墙']] },
+    { tm:'2:00', nm:'问题 · 同类作品通病', t:'为什么要反着做', p:'点出「重技术轻叙事」这个行业通病，说明我们的差异化来自取舍，而不是技术堆料。',
+      s:'「故宫全景、数字敦煌都很强，但它们背后是国家队。学生作品照搬全景漫游，拼精度拼不过，拼数据量也拼不过。所以我们放弃大而全，只讲一条线。」',
+      link:[['#pos','定位']] },
+    { tm:'5:00', nm:'演示 · 牌墙与解码', t:'两个页面，讲完「麻将从哪来」', p:'先让牌墙自己建立体感，再点开一张筒子，翻过来看木桶。这是全场最容易被记住的 30 秒。',
+      s:'「这 144 张牌没有一张是图片，全部是代码画的。点开这张一筒——它翻过来是一只木桶，因为中庭地砖上就刻着这句话：筒子源于海船上盛水盛粮的桶。」',
+      link:[['demo-01-paiqiang.html','牌墙'],['demo-02-paimian.html','牌面解码']] },
+    { tm:'10:00', nm:'演示 · 纸变竹', t:'一次材质翻转，讲清一次改良', p:'拖动滑块，从纸到竹。顺带讲 136 张的构成，说明「不是发明，是收束」。',
+      s:'「同治三年，陈鱼门把纸牌改成竹骨。注意展板上的因果：不是『发明』，是『不便』。所有真实的改良都长这样——先有一个具体的麻烦。」',
+      link:[['demo-03-zhibianzhu.html','纸变竹']] },
+    { tm:'13:00', nm:'演示 · 航线', t:'让牌走出去', p:'点四条航线，说明牌每停一站就变一次样。强调这是抽象航线图，不是地图。',
+      s:'「同一副牌，到日本变成竞技，到欧美被印上数字，到南洋换了材质。文化常常不是被输出，是被一起玩出去的。」',
+      link:[['demo-04-hangxian.html','寰宇四方']] },
+    { tm:'15:00', nm:'演示 · 我的牌面', t:'现场生成一张', p:'当场输入一位学生的名字，生成一张牌面卡并下载。让学生看到「我也可以有一张」。',
+      s:'「平和堂那组铜像留了一个空位，是给观众的。这个生成器就是那个空位——现在请一位同学上来，写个名字。」',
+      link:[['demo-05-wodepaimian.html','我的牌面']] },
+    { tm:'17:00', nm:'演示 · 索引与看板', t:'证明「不是一张皮」', p:'点一本书调档，再反查架上位置；切到看板，让刚才的操作变成数字。这是答辩的核心武器。',
+      s:'「刚才你们点的每一下都记在这里。热度、漏斗、时段——这不是假数据，是这条链路真的通了。数据孪生不是概念，是这一张表。」',
+      link:[['demo-06-shucang.html','三级索引'],['demo-07-dashboard.html','看板']] },
+    { tm:'19:00', nm:'收口 · 三周排期与分工', t:'把兴奋变成任务', p:'翻到甘特图，明确谁在哪一天交什么。当场确认第一次文案会的时间。',
+      s:'「18 天交付，3 天训练。第 3 天文案定稿，第 12 天六个页面可点，第 18 天冻结——冻结之后不加任何新功能。这是纪律，不是建议。」',
+      link:[['#timeline','排期'],['#roles','分工']] }
+  ];
+
+  var runList = document.getElementById('runList');
+  var runStage = document.getElementById('runStage');
+  var curStep = 0;
+  RUN.forEach(function(r, i){
+    var b = document.createElement('button');
+    b.className = 'run-i' + (i === 0 ? ' on' : '');
+    b.innerHTML = '<span class="tm">' + r.tm + '</span><span class="nm">' + r.nm + '</span>';
+    b.onclick = function(){ showStep(i); };
+    runList.appendChild(b);
+  });
+  function showStep(i){
+    curStep = i;
+    var r = RUN[i];
+    runList.querySelectorAll('.run-i').forEach(function(b, k){ b.classList.toggle('on', k === i); });
+    runStage.innerHTML = '<div class="no">STEP ' + String(i+1).padStart(2,'0') + ' · ' + r.tm + '</div>' +
+      '<h3>' + r.t + '</h3>' +
+      '<p>' + r.p + '</p>' +
+      '<p class="script">' + r.s + '</p>' +
+      '<div class="lk">' + r.link.map(function(l){
+        return '<a class="chip" href="' + l[0] + '">' + l[1] + ' →</a>';
+      }).join('') + '</div>';
+    TY.track('总览','切换演示步骤',{step:i+1});
+  }
+  document.getElementById('nextStep').onclick = function(){ showStep((curStep + 1) % RUN.length); };
+  document.getElementById('prevStep').onclick = function(){ showStep((curStep - 1 + RUN.length) % RUN.length); };
+  showStep(0);
+
+  /* 顶栏锚点平滑滚动（考虑固定头高度） */
+  document.querySelectorAll('.topnav a[href^="#"]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var id = this.getAttribute('href');
+      var el = document.querySelector(id);
+      if(!el) return;
+      e.preventDefault();
+      window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 58, behavior:'smooth' });
+    });
+  });
+
+  TY.track('总览','进入页面');
+})();
+</script>
+</body>
+</html>

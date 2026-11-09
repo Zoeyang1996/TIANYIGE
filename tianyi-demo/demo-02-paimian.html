@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>解 · 牌面密码 ｜ 天一阁 · 数智幻境</title>
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+.hero{padding:132px 0 44px;position:relative}
+.hero .h1{font-size:clamp(30px,4vw,48px);max-width:20ch}
+.hero .lead{margin-top:20px}
+.hero-side{position:absolute;right:28px;top:140px;width:230px;text-align:right;font-size:11.5px;letter-spacing:.1em;color:var(--ivory-3);line-height:2}
+@media(max-width:980px){.hero-side{display:none}}
+
+/* ---------- 解码台 ---------- */
+.decode{display:grid;grid-template-columns:340px 1fr;gap:44px;align-items:start}
+.tile-stage{position:sticky;top:88px}
+.flip-wrap{perspective:1200px;width:100%;max-width:300px;margin:0 auto}
+.flip{position:relative;width:100%;padding-top:133%;transform-style:preserve-3d;transition:transform 1s var(--ease);cursor:pointer}
+.flip.flipped{transform:rotateY(180deg)}
+.face{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:6px;display:grid;place-items:center;overflow:hidden;
+}
+.face-front{
+  background:linear-gradient(152deg,#F9F2E4,#EEE1CB 54%,#DBC9AE);
+  box-shadow:0 26px 50px -22px rgba(0,0,0,.9),inset 0 2px 0 rgba(255,255,255,.8),inset 0 -3px 6px rgba(120,100,72,.25);
+}
+.face-front svg{width:66%;height:70%}
+.face-back{
+  transform:rotateY(180deg);
+  background:linear-gradient(160deg,#22352C,#17241F);
+  border:1px solid rgba(243,234,218,.16);
+  box-shadow:0 26px 50px -22px rgba(0,0,0,.9),inset 0 0 60px rgba(92,122,99,.18);
+  padding:22px;
+}
+.face-back svg{width:100%;height:auto;max-height:78%}
+.back-cap{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.2em;color:var(--ivory-3)}
+.flip-hint{text-align:center;margin-top:16px;font-size:11.5px;letter-spacing:.14em;color:var(--ivory-3)}
+
+/* 牌面切换 */
+.suit-tabs{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 30px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.suit-tabs .tab-hint{margin-left:auto;font-size:11px;letter-spacing:.1em;color:var(--ivory-3)}
+.suit-tabs button{
+  background:none;border:1px solid var(--line);color:var(--ivory-2);
+  font-size:13px;padding:8px 18px;border-radius:2px;transition:.25s;letter-spacing:.08em;
+}
+.suit-tabs button:hover{border-color:var(--ivory-3);color:var(--ivory)}
+.suit-tabs button.on{background:rgba(161,58,44,.2);border-color:rgba(196,87,63,.6);color:#F6E7D6}
+.num-row{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
+.num-row button{
+  width:29px;height:29px;display:grid;place-items:center;background:none;
+  border:1px solid var(--line);color:var(--ivory-3);border-radius:2px;font-size:12px;
+  font-family:var(--serif);transition:.2s;
+}
+.num-row button:hover{color:var(--ivory);border-color:var(--ivory-3)}
+.num-row button.on{background:var(--ivory);color:var(--ink);border-color:var(--ivory)}
+
+/* ---------- 右栏解读 ---------- */
+.readout{min-height:460px}
+.read-name{font-family:var(--serif);font-size:44px;letter-spacing:.08em;line-height:1;margin-bottom:6px}
+.read-sub{font-size:11.5px;letter-spacing:.24em;color:var(--gold);margin-bottom:26px}
+.read-objcap{
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.14em;
+  color:var(--ivory-2);border-bottom:1px solid var(--line);padding-bottom:5px;margin-bottom:18px;
+}
+.read-objcap b{color:var(--red-l);font-weight:400}
+.read-text{font-size:15px;line-height:2.05;color:rgba(243,234,218,.86);margin:0 0 22px;max-width:46ch}
+.read-quote{
+  font-family:var(--serif);font-size:14.5px;line-height:1.95;color:var(--ivory-2);
+  border-left:1px solid rgba(154,125,74,.55);padding-left:18px;margin:0 0 24px;max-width:46ch;
+}
+.audio-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.audio-btn{
+  display:inline-flex;align-items:center;gap:9px;background:none;border:1px solid rgba(243,234,218,.24);
+  color:var(--ivory);padding:8px 15px;border-radius:999px;font-size:12.5px;transition:.25s;
+}
+.audio-btn:hover{background:rgba(243,234,218,.07);border-color:rgba(243,234,218,.45)}
+.audio-note{font-size:11px;color:var(--ivory-3)}
+.wave{display:flex;gap:2.5px;align-items:flex-end;height:13px}
+.wave i{width:2px;background:var(--red-l);border-radius:2px;height:4px}
+.wave.play i{animation:wv .7s infinite ease-in-out}
+.wave i:nth-child(2){animation-delay:.1s}.wave i:nth-child(3){animation-delay:.2s}.wave i:nth-child(4){animation-delay:.3s}.wave i:nth-child(5){animation-delay:.15s}
+@keyframes wv{0%,100%{height:4px}50%{height:13px}}
+
+/* ---------- 方言 ---------- */
+.terms{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:start;border-top:1px solid var(--line);padding-top:64px}
+.term-chips{display:flex;flex-wrap:wrap;gap:8px}
+.term-chips button{
+  background:rgba(243,234,218,.03);border:1px solid var(--line);color:var(--ivory-2);
+  padding:8px 14px;border-radius:2px;font-size:13.5px;font-family:var(--serif);
+  letter-spacing:.1em;transition:.24s;position:relative;
+}
+.term-chips button:hover{border-color:rgba(243,234,218,.4);color:var(--ivory);background:rgba(243,234,218,.07)}
+.term-chips button.on{background:rgba(161,58,44,.18);border-color:rgba(196,87,63,.55);color:#F7E8D8}
+.term-detail{
+  border:1px solid var(--line);border-radius:3px;padding:28px;position:sticky;top:88px;
+  background:linear-gradient(170deg,rgba(243,234,218,.055),rgba(243,234,218,.012));
+  min-height:240px;
+}
+.td-word{font-family:var(--serif);font-size:34px;letter-spacing:.1em}
+.td-read{font-size:12.5px;color:var(--gold);letter-spacing:.14em;margin:8px 0 18px;font-family:var(--sans)}
+.td-body{font-size:13.5px;line-height:1.95;color:var(--ivory-2);margin:0}
+.td-foot{margin-top:20px;padding-top:14px;border-top:1px solid var(--line-2);font-size:11.5px;color:var(--ivory-3)}
+
+@media(max-width:980px){
+  .decode{grid-template-columns:1fr;gap:32px}
+  .tile-stage{position:static}
+  .flip-wrap{max-width:230px}
+  .terms{grid-template-columns:1fr;gap:28px}
+  .term-detail{position:static}
+}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">天</span><span>天一阁 · 数智幻境</span></a>
+  <nav class="topnav">
+    <a href="demo-01-paiqiang.html">序·牌墙</a>
+    <a href="demo-02-paimian.html">解·牌面</a>
+    <a href="demo-03-zhibianzhu.html">定·纸变竹</a>
+    <a href="demo-04-hangxian.html">传·航线</a>
+    <a href="demo-05-wodepaimian.html">续·我的牌面</a>
+    <a href="demo-06-shucang.html">藏·索引</a>
+    <a href="demo-07-dashboard.html">观·看板</a>
+  </nav>
+  <a class="back" href="index.html">总览 ↗</a>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span>CHAPTER 03</span><span class="zh">解 · 牌面密码</span></div>
+    <h1 class="h1">把一张牌翻过来，<br>看见一条船。</h1>
+    <p class="lead">麻将的符号不是凭空画的。筒是船上盛水的桶，索是缆绳，万是钱数，风是要看的天。点开任意一张牌，它背后的物象会浮出来。</p>
+    <div class="hero-side">
+      交互说明<br>
+      ① 左侧切换花色与点数<br>
+      ② 点击牌面 · 翻转看物象<br>
+      ③ 下方 14 条方言可直接点选
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--tight">
+  <div class="wrap">
+    <div class="suit-tabs reveal" id="suitTabs">
+      <button data-s="tong" class="on">筒 · 桶</button>
+      <button data-s="suo">索 · 绳</button>
+      <button data-s="wan">萬 · 钱</button>
+      <button data-s="wind">风 · 帆</button>
+      <button data-s="dragon">箭 · 中</button>
+      <span class="tab-hint">切换花色 → 点牌翻面看物象</span>
+    </div>
+
+    <div class="decode">
+      <!-- 左：牌 -->
+      <div class="tile-stage reveal">
+        <div class="num-row" id="numRow" style="margin-bottom:22px"></div>
+        <div class="flip-wrap">
+          <div class="flip" id="flip" role="button" tabindex="0" aria-label="点击翻转牌面">
+            <div class="face face-front" id="faceFront"></div>
+            <div class="face face-back" id="faceBack">
+              <div id="objWrap"></div>
+              <div class="back-cap" id="objCap">木 桶</div>
+            </div>
+          </div>
+        </div>
+        <div class="flip-hint" id="flipHint">点击牌面 · 翻转看物象</div>
+      </div>
+
+      <!-- 右：解读 -->
+      <div class="readout reveal" data-d="1">
+        <div class="read-name" id="readName">一筒</div>
+        <div class="read-sub" id="readSub">筒子 · TONG</div>
+        <div class="read-objcap"><b>物象</b><span id="objLine">海船上盛水盛粮的木桶</span></div>
+        <p class="read-text" id="readText"></p>
+        <p class="read-quote" id="readQuote"></p>
+        <div class="audio-row">
+          <button class="audio-btn" id="playBtn">
+            <span class="wave" id="wave"><i></i><i></i><i></i><i></i><i></i></span>
+            <span>听读音</span>
+          </button>
+          <span class="audio-note" id="audioNote">系统语音占位 · 真人录音已列入素材清单</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- 方言 ---------- -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span>DIALECT</span><span class="zh">馆方《麻将中的宁波方言》展板 · 14 条</span></div>
+      <h2 class="sec-title"><span class="num">14</span>牌桌上的话，是宁波话</h2>
+      <p class="sec-lead">这是全站最省力也最独特的一块内容：展板已经给出了读音与释义，我们不需要重新考证，只需要把它做成可以点的东西。</p>
+    </div>
+
+    <div class="terms">
+      <div class="term-chips reveal" id="termChips"></div>
+      <div class="term-detail reveal" data-d="1" id="termDetail">
+        <div class="td-word">和</div>
+        <div class="td-read">读 hú（胡）</div>
+        <p class="td-body">和牌即最后一张（第十四张）使手中牌成为四组三张加一对将牌。宁波话里「和」不读 hé。</p>
+        <div class="td-foot">来源 · 天一阁麻将起源地陈列馆展板（中英日三语）</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--tight">
+  <div class="wrap">
+    <blockquote class="quote reveal" style="max-width:760px">
+      麻雀牌是一种手脑耳目的愉悦。
+      <cite>徐志摩 · 可作本章引言，也可作答辩开场的第一句话</cite>
+    </blockquote>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="wrap" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;width:100%">
+  <span>天一阁 · 数智幻境 ／ demo-02 · 牌面密码</span>
+  <span>牌面与物象均为程序绘制 · 史料引自馆方展板</span>
+</div></footer>
+
+<script src="assets/store.js"></script>
+<script src="assets/tiles.js"></script>
+<script>
+(function(){
+  /* ---------------- 物象线描 ---------------- */
+  var S = 'stroke="#D9C9A8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+  var OBJ = {
+    tong: '<svg viewBox="0 0 200 200">' +
+      '<ellipse cx="100" cy="56" rx="46" ry="12" ' + S + '/>' +
+      '<path d="M54 56 L66 158 Q100 168 134 158 L146 56" ' + S + '/>' +
+      '<ellipse cx="100" cy="56" rx="30" ry="7" ' + S + ' opacity=".45"/>' +
+      '<path d="M58 86 Q100 96 142 86" ' + S + ' opacity=".8"/>' +
+      '<path d="M62 126 Q100 136 138 126" ' + S + ' opacity=".8"/>' +
+      '<path d="M100 68 L100 150" ' + S + ' opacity=".2"/>' +
+      '</svg>',
+    suo: '<svg viewBox="0 0 200 200">' +
+      '<path d="M40 62 C 70 40, 100 84, 130 62 C 150 48, 160 56, 162 62" ' + S + '/>' +
+      '<path d="M40 82 C 70 60, 100 104, 130 82 C 150 68, 160 76, 162 82" ' + S + '/>' +
+      '<path d="M40 102 C 70 80, 100 124, 130 102 C 150 88, 160 96, 162 102" ' + S + '/>' +
+      '<path d="M40 122 C 70 100, 100 144, 130 122 C 150 108, 160 116, 162 122" ' + S + ' opacity=".6"/>' +
+      '<path d="M40 142 C 70 120, 100 164, 130 142 C 150 128, 160 136, 162 142" ' + S + ' opacity=".35"/>' +
+      '<circle cx="40" cy="62" r="5" ' + S + '/><circle cx="162" cy="62" r="5" ' + S + '/>' +
+      '</svg>',
+    wan: '<svg viewBox="0 0 200 200">' +
+      '<circle cx="74" cy="80" r="30" ' + S + '/><rect x="66" y="72" width="16" height="16" ' + S + '/>' +
+      '<circle cx="126" cy="80" r="30" ' + S + '/><rect x="118" y="72" width="16" height="16" ' + S + '/>' +
+      '<circle cx="74" cy="136" r="30" ' + S + '/><rect x="66" y="128" width="16" height="16" ' + S + '/>' +
+      '<circle cx="126" cy="136" r="30" ' + S + '/><rect x="118" y="128" width="16" height="16" ' + S + '/>' +
+      '<path d="M100 30 L100 50 M100 166 L100 182" ' + S + ' opacity=".45"/>' +
+      '</svg>',
+    wind: '<svg viewBox="0 0 200 200">' +
+      '<path d="M100 42 L100 150" ' + S + '/>' +
+      '<path d="M100 52 C 132 62, 152 92, 156 128 C 132 122, 112 104, 100 84 Z" ' + S + '/>' +
+      '<path d="M100 66 C 78 76, 62 102, 58 132 C 78 126, 92 108, 100 90 Z" ' + S + ' opacity=".55"/>' +
+      '<path d="M52 156 Q100 174 148 156" ' + S + '/>' +
+      '<path d="M100 150 L100 162" ' + S + '/>' +
+      '</svg>',
+    dragon: '<svg viewBox="0 0 200 200">' +
+      '<path d="M62 26 L62 148" ' + S + '/><path d="M100 26 L100 148" ' + S + '/><path d="M138 26 L138 148" ' + S + '/>' +
+      '<path d="M62 26 L56 40 M62 26 L68 40 M100 26 L94 40 M100 26 L106 40 M138 26 L132 40 M138 26 L144 40" ' + S + '/>' +
+      '<path d="M52 148 L70 148 M90 148 L108 148 M128 148 L146 148" ' + S + '/>' +
+      '<circle cx="100" cy="96" r="42" ' + S + ' opacity=".32"/>' +
+      '<circle cx="100" cy="96" r="26" ' + S + ' opacity=".5"/>' +
+      '<circle cx="100" cy="96" r="8" fill="#C4573F" stroke="none"/>' +
+      '</svg>'
+  };
+
+  /* ---------------- 文案 ---------------- */
+  var DATA = {
+    tong: {
+      cn:'筒子', en:'TONG', obj:'海船上盛水盛粮的木桶', cap:'木 桶',
+      lead:'筒子牌，也俗称饼子，源于海船上盛水盛粮的桶。',
+      text:'牌面上的同心圆，从正上方看就是一只木桶的桶口。一至九筒，每色四张，共三十六张。这段解释不是我们推断的——它刻在中庭地砖旁的青石上，原话只有四十余字，却把「筒子从哪来」讲得干干净净。',
+      quote:'「筒子牌，也俗称饼子，源于海船上盛水盛粮的桶。牌面一至九，每色四张，共三十六张。」—— 中庭地砖铭文',
+      say:'筒子牌，饼子，海船上的桶。'
+    },
+    suo: {
+      cn:'索子', en:'SUO', obj:'船上的缆绳、渔网与升帆的绳索', cap:'缆 绳',
+      lead:'索子牌，俗称条子，源于船上缆绳与渔网。',
+      text:'短棒排列成竖列，是绞紧的麻绳。最值得看的是「一条」：在天一阁实拍到的一副牌里，它不是竖条，而是一只完整的鸟——「麻雀」的「雀」，被直接画在了牌面上。牌名、方言、图像，在那一张牌上重合。',
+      quote:'「麻将」即宁波话的「麻雀」，甬人念「麻雀」为「麻将」。',
+      say:'索子牌，缆绳，一条是只鸟。'
+    },
+    wan: {
+      cn:'萬子', en:'WAN', obj:'船家对财富的计量与渴望', cap:'钱 串',
+      lead:'「萬」是计价单位，一萬至九萬，双轨记数。',
+      text:'牌面上同时出现汉字数字与「萬」字，是中国传统「点数—汉字」双轨记数法最直白的一次图形化。对跑海运的宁波人来说，万不是抽象的数，是一船货、一趟风、一年的收成。',
+      quote:'「世事沉浮中发白，人情冷暖马牛风。」—— 德和堂前廊柱楹联',
+      say:'萬子牌，铜钱，一萬到九萬。'
+    },
+    wind: {
+      cn:'风牌', en:'WIND', obj:'帆船时代对风向的依赖', cap:'帆 影',
+      lead:'东、南、西、北，各四张，共十六张。',
+      text:'出海观风而定行止。风牌既是符号，也是牌桌上的方位：庄家东风、下家南风、对家西风、上家北风。一张风牌同时指向天、船、座次三件事，这在整套牌里是唯一的。',
+      quote:'「门风：牌手风位标志，甬语称『敛门风』。」—— 方言展板',
+      say:'东南西北，四风，看风向出海。'
+    },
+    dragon: {
+      cn:'箭牌', en:'DRAGON', obj:'由红花、白花、老千改称而来', cap:'三 箭',
+      lead:'红中、绿发、白板，合称三箭，各四张共十二张。',
+      text:'它们不是新造的，是改名的：红花改绿发、白花改白板、老千改红中。改的是称呼，留下的是颜色。所以你会看到「发」是绿的、「中」是红的、「白」是空的——三张牌的颜色逻辑，来自改名之前。',
+      quote:'「易红花为绿发，白花为白板，老千为红中，名『三箭』，各四张，共十二张。」—— 《陈鱼门先生传略》展板',
+      say:'红中，绿发，白板，三箭十二张。'
+    }
+  };
+  var MAX = { tong:9, suo:9, wan:9, wind:4, dragon:3 };
+
+  var state = { suit:'tong', num:1 };
+
+  var flip = document.getElementById('flip');
+  var numRow = document.getElementById('numRow');
+
+  function buildNums(){
+    numRow.innerHTML = '';
+    for(var i=1;i<=MAX[state.suit];i++){
+      var b = document.createElement('button');
+      b.textContent = i;
+      if(i === state.num) b.className = 'on';
+      b.onclick = function(){ state.num = +this.textContent; render(true); };
+      numRow.appendChild(b);
+    }
+  }
+
+  function render(clicked){
+    var d = DATA[state.suit];
+    var spec = { suit: state.suit, num: state.num };
+    document.getElementById('faceFront').innerHTML = Tiles.svg(spec);
+    document.getElementById('objWrap').innerHTML = OBJ[state.suit];
+    document.getElementById('objCap').textContent = d.cap;
+    document.getElementById('readName').textContent = Tiles.name(spec);
+    document.getElementById('readSub').textContent = d.cn + ' · ' + d.en + ' · 第 ' + state.num + ' 张';
+    document.getElementById('objLine').textContent = d.obj;
+    document.getElementById('readText').textContent = d.text;
+    document.getElementById('readQuote').textContent = d.quote;
+    buildNums();
+    Array.prototype.forEach.call(numRow.children, function(b, i){
+      b.classList.toggle('on', (i+1) === state.num);
+    });
+    if(clicked){ thud(); TY.track('解·牌面密码','切换牌面',{suit:state.suit,num:state.num}); }
+  }
+
+  document.getElementById('suitTabs').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    this.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    state.suit = b.dataset.s; state.num = 1;
+    flip.classList.remove('flipped');
+    render(true);
+  });
+
+  flip.addEventListener('click', function(){
+    flip.classList.toggle('flipped');
+    TY.track('解·牌面密码', flip.classList.contains('flipped') ? '翻转看物象' : '翻回牌面', {suit:state.suit});
+    if(flip.classList.contains('flipped')) thud();
+  });
+  flip.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip.click(); } });
+
+  /* ---------------- 音效：落牌（Web Audio 合成） ---------------- */
+  var ac = null;
+  function thud(){
+    try{
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if(ac.state === 'suspended') ac.resume();
+      var t = ac.currentTime;
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'triangle'; o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(58, t + .12);
+      g.gain.setValueAtTime(.16, t); g.gain.exponentialRampToValueAtTime(.0001, t + .18);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + .2);
+      var buf = ac.createBuffer(1, 2048, ac.sampleRate), ch = buf.getChannelData(0);
+      for(var i=0;i<2048;i++){ ch[i] = (Math.random()*2-1) * Math.pow(1-i/2048, 3); }
+      var src = ac.createBufferSource(), ng = ac.createGain();
+      src.buffer = buf; ng.gain.value = .07;
+      src.connect(ng).connect(ac.destination); src.start(t);
+    }catch(e){}
+  }
+
+  /* ---------------- 读音（占位） ---------------- */
+  document.getElementById('playBtn').addEventListener('click', function(){
+    var wave = document.getElementById('wave');
+    wave.classList.add('play');
+    setTimeout(function(){ wave.classList.remove('play'); }, 1400);
+    var txt = DATA[state.suit].say;
+    try{
+      if('speechSynthesis' in window){
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(txt);
+        u.lang = 'zh-CN'; u.rate = .85; u.pitch = .95;
+        speechSynthesis.speak(u);
+      }
+    }catch(e){}
+    TY.track('解·牌面密码','播放读音',{suit:state.suit});
+  });
+
+  /* ---------------- 方言 14 条 ---------------- */
+  var TERMS = [
+    {w:'麻将', r:'宁波话「麻雀」', d:'原写作麻雀。徐珂《清稗类钞》谓「麻雀，马吊之音转也」；甬人念「麻雀」为「麻将」。'},
+    {w:'和', r:'读 hú（胡）', d:'和牌即最后一张（第十四张）使手中牌成为四组三张加一对将牌。'},
+    {w:'停', r:'读 tīng', d:'对自己的牌局组合停当、收拾停妥，完毕之意。'},
+    {w:'嵌', r:'读 kàn，不读 qiān', d:'甬称物塞入缝隙间曰「嵌」，如「嵌挡」「嵌镶」。'},
+    {w:'横和', r:'宁波话', d:'牌未组成却误喊「和」，检查时发现并未成牌，称「横和」。'},
+    {w:'朋（碰）', r:'宁波话', d:'手中有对子，他家打出相同牌即可「朋」；「朋」为同或并一之意。'},
+    {w:'生张 / 熟张', r:'宁波话', d:'牌池内未出现者称生张，多次出现者称熟张；对应甬语「生头」「熟头」。'},
+    {w:'地', r:'宁波话', d:'牌墙方城之外、各家门前放付露牌的空地；与甬语「道地」意同。'},
+    {w:'色', r:'宁波话', d:'索子绿、筒子黑、万子红，称三色牌；甬语有「老三色」。'},
+    {w:'放铳', r:'宁波话', d:'打出牌让别人和，称放铳；甬人谓不慎泄露秘密曰「放铜铳」。'},
+    {w:'门风', r:'宁波话', d:'牌手风位标志：庄家东风、下家南风、对家西风、上家北风；甬语「敛门风」。'},
+    {w:'相公', r:'宁波话', d:'多牌或少牌者称相公，只有陪打资格；甬语唐时称应试童生为「考相公」。'},
+    {w:'台头', r:'宁波话', d:'对胜负基本计数单位的称谓，系「番」的别称。'},
+    {w:'搓', r:'宁波话', d:'搓麻将即打麻将，为浙东一带用语，如搓绳、搓手。'}
+  ];
+  var chips = document.getElementById('termChips');
+  TERMS.forEach(function(t, i){
+    var b = document.createElement('button');
+    b.textContent = t.w;
+    if(i === 1) b.classList.add('on');
+    b.onclick = function(){
+      chips.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      var el = document.getElementById('termDetail');
+      el.innerHTML = '<div class="td-word">' + t.w + '</div>' +
+        '<div class="td-read">' + (t.r === '宁波话' ? '宁波话读音' : t.r) + '</div>' +
+        '<p class="td-body">' + t.d + '</p>' +
+        '<div class="td-foot">来源 · 天一阁麻将起源地陈列馆展板（中英日三语）</div>';
+      TY.track('解·牌面密码','查看方言',{term:t.w});
+    };
+    chips.appendChild(b);
+  });
+
+  render(false);
+  TY.track('解·牌面密码','进入页面');
+})();
+</script>
+</body>
+</html>

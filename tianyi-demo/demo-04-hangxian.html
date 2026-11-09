@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>传 · 寰宇四方 ｜ 天一阁 · 数智幻境</title>
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+.hero{padding:132px 0 26px}
+.hero .h1{font-size:clamp(30px,4vw,48px);max-width:22ch}
+.hero .lead{margin-top:20px}
+
+.map-panel{
+  position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;
+  background:
+    radial-gradient(58% 60% at 30% 52%, rgba(92,122,99,.14), transparent 74%),
+    linear-gradient(180deg,rgba(243,234,218,.028),rgba(15,24,21,.4));
+  margin-top:8px;
+}
+.map-panel svg{display:block;width:100%;height:auto}
+.map-note{
+  position:absolute;left:18px;top:14px;font-size:10.5px;letter-spacing:.16em;color:var(--ivory-3);
+  border:1px solid var(--line);padding:4px 9px;border-radius:2px;background:rgba(15,24,21,.5);
+}
+.route{fill:none;stroke-width:1.4;opacity:.30;transition:opacity .5s,stroke-width .5s}
+.route.on{opacity:.95;stroke-width:2}
+.node{cursor:pointer}
+.node circle{transition:.35s}
+.node:hover circle.ring{fill:rgba(243,234,218,.09)}
+.node text{font-family:var(--serif);letter-spacing:.08em;transition:.35s}
+.node.on text{fill:#F3EADA}
+.node .lbl{font-size:15px;fill:rgba(243,234,218,.62)}
+.node.on .lbl{fill:#F3EADA}
+.node .sub{font-size:10.5px;fill:rgba(243,234,218,.34);font-family:"PingFang SC",sans-serif;letter-spacing:.06em}
+.node.on .sub{fill:rgba(243,234,218,.62)}
+
+/* 信息区 */
+.info{
+  display:grid;grid-template-columns:230px 1fr;gap:32px;align-items:start;
+  border-top:1px solid var(--line);background:rgba(16,25,21,.55);padding:26px 28px 24px;
+}
+.info-no{font-size:10.5px;letter-spacing:.22em;color:var(--gold);margin-bottom:9px}
+.info-t{font-family:var(--serif);font-size:24px;letter-spacing:.06em;margin-bottom:5px;line-height:1.3}
+.info-year{font-size:11.5px;color:var(--ivory-3);letter-spacing:.1em}
+.info-p{font-size:13.5px;line-height:1.95;color:rgba(243,234,218,.82);margin:0 0 12px;max-width:78ch}
+.info-ev{font-size:11px;color:var(--ivory-3);border-top:1px solid var(--line-2);padding-top:10px;line-height:1.7}
+
+.route-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.route-tabs button{
+  background:none;border:1px solid var(--line);color:var(--ivory-2);padding:9px 16px;
+  border-radius:2px;font-size:13px;transition:.25s;letter-spacing:.04em;
+  display:flex;align-items:center;gap:8px;
+}
+.route-tabs button:hover{border-color:rgba(243,234,218,.36);color:var(--ivory)}
+.route-tabs button.on{border-color:rgba(196,87,63,.6);background:rgba(161,58,44,.14);color:var(--ivory)}
+.route-tabs i{width:7px;height:7px;border-radius:50%;display:block}
+
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:34px}
+@media(max-width:980px){
+  .info{grid-template-columns:1fr;gap:12px;padding:22px 20px}
+  .three{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">天</span><span>天一阁 · 数智幻境</span></a>
+  <nav class="topnav">
+    <a href="demo-01-paiqiang.html">序·牌墙</a>
+    <a href="demo-02-paimian.html">解·牌面</a>
+    <a href="demo-03-zhibianzhu.html">定·纸变竹</a>
+    <a href="demo-04-hangxian.html">传·航线</a>
+    <a href="demo-05-wodepaimian.html">续·我的牌面</a>
+    <a href="demo-06-shucang.html">藏·索引</a>
+    <a href="demo-07-dashboard.html">观·看板</a>
+  </nav>
+  <a class="back" href="index.html">总览 ↗</a>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span>CHAPTER 04</span><span class="zh">传 · 从宁波港出发</span></div>
+    <h1 class="h1">一张牌出海，<br>就换一副样子。</h1>
+    <p class="lead">鸦片战争后宁波被辟为五口通商口岸，「走遍天下，不如宁波江厦」。商贾在江厦学会麻将带往各地，牌也沿着海路走，每停一站就变一次样。</p>
+  </div>
+</section>
+
+<section class="sec sec--tight">
+  <div class="wrap">
+    <div class="map-panel reveal">
+      <div class="map-note">航线示意 · 非地理投影</div>
+
+      <svg viewBox="0 0 1000 560" id="map" role="img" aria-label="麻将传播航线示意图">
+        <defs>
+          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#F3EADA" stop-opacity=".22"/>
+            <stop offset="100%" stop-color="#F3EADA" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- 细网格点 -->
+        <g opacity=".16" id="dots"></g>
+
+        <!-- 航线 -->
+        <path class="route" id="r-jp" d="M330 300 Q560 136 806 146" stroke="#C4573F"/>
+        <path class="route" id="r-us" d="M330 300 Q604 486 858 430" stroke="#5C7A63"/>
+        <path class="route" id="r-eu" d="M330 300 Q176 250 152 150" stroke="#9A7D4A"/>
+        <path class="route" id="r-sea" d="M330 300 Q430 470 522 500" stroke="#7E8B7A"/>
+
+        <!-- 起点 -->
+        <g class="node on" id="n-home" data-k="home" transform="translate(330,300)">
+          <circle r="64" fill="url(#glow)"/>
+          <circle class="ring" r="12" fill="#A13A2C" stroke="#F3EADA" stroke-width="1.2"/>
+          <circle r="3" fill="#F3EADA"/>
+          <text class="lbl" y="-24" text-anchor="middle">宁波</text>
+          <text class="sub" y="34" text-anchor="middle">NINGBO · 1844 开埠</text>
+        </g>
+
+        <!-- 日本 -->
+        <g class="node" id="n-jp" data-k="jp" transform="translate(806,146)">
+          <circle class="ring" r="9" fill="#C4573F" opacity=".85"/>
+          <text class="lbl" y="-18" text-anchor="middle">长崎 · 横滨</text>
+          <text class="sub" y="26" text-anchor="middle">JAPAN · 1909</text>
+        </g>
+
+        <!-- 美国 -->
+        <g class="node" id="n-us" data-k="us" transform="translate(858,430)">
+          <circle class="ring" r="9" fill="#5C7A63"/>
+          <text class="lbl" y="-18" text-anchor="middle">旧金山 · 波士顿</text>
+          <text class="sub" y="26" text-anchor="middle">USA · 1879</text>
+        </g>
+
+        <!-- 欧洲 -->
+        <g class="node" id="n-eu" data-k="eu" transform="translate(152,150)">
+          <circle class="ring" r="9" fill="#9A7D4A"/>
+          <text class="lbl" y="-18" text-anchor="middle">伦敦</text>
+          <text class="sub" y="26" text-anchor="middle">EUROPE · 19C</text>
+        </g>
+
+        <!-- 南洋 -->
+        <g class="node" id="n-sea" data-k="sea" transform="translate(522,500)">
+          <circle class="ring" r="9" fill="#7E8B7A"/>
+          <text class="lbl" y="-18" text-anchor="middle">新加坡 · 马六甲</text>
+          <text class="sub" y="26" text-anchor="middle">NANYANG</text>
+        </g>
+
+        <!-- 移动的小点 -->
+        <circle id="traveler" r="3.4" fill="#F3EADA" opacity="0"/>
+      </svg>
+
+      <div class="info" id="info">
+        <div class="info-l">
+          <div class="info-no" id="iNo">起点 · ORIGIN</div>
+          <div class="info-t" id="iT">江厦码头</div>
+          <div class="info-year" id="iY">1844 年 · 宁波开埠</div>
+        </div>
+        <div class="info-r">
+          <p class="info-p" id="iP">宁波被辟为五口通商口岸之一，江厦一带海轮云集。各地商贾在这里学会麻将，再带回京津沪与沿海各省；也在这里，麻将第一次被外国人看见。</p>
+          <div class="info-ev" id="iE">连接下一个落点 → 点下方任一航线，或「依次播放」</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="route-tabs" id="tabs">
+      <button class="on" data-k="home" style="border-color:rgba(196,87,63,.6);background:rgba(161,58,44,.14);color:var(--ivory)"><i style="background:#A13A2C"></i>起点 · 宁波</button>
+      <button data-k="jp"><i style="background:#C4573F"></i>东渡日本</button>
+      <button data-k="us"><i style="background:#5C7A63"></i>西行欧美</button>
+      <button data-k="eu"><i style="background:#9A7D4A"></i>英伦</button>
+      <button data-k="sea"><i style="background:#7E8B7A"></i>南下南洋</button>
+      <button class="btn btn-line btn-sm" id="playAll" style="border-style:dashed">▶ 依次播放</button>
+    </div>
+
+    <div class="three">
+      <div class="card reveal">
+        <div class="card-h"><span class="tag gold">物证 S04 / S05</span></div>
+        <h3 class="card-t">日本：牌上多了字母</h3>
+        <p class="card-p">实拍的日本竹骨牌，风牌另标 E / S / W / N；另一副木制「渔樵耕读」牌，牌面手写上色、木纹裸露，比工业制品更有温度。</p>
+      </div>
+      <div class="card reveal" data-d="1">
+        <div class="card-h"><span class="tag gold">物证 11</span></div>
+        <h3 class="card-t">欧美：数字被印上去</h3>
+        <p class="card-p">西方牌在牌角加注阿拉伯数字与英文色名。对不认汉字的玩家来说，牌面从「字」退回了「图案＋数字」——这是传播中最彻底的一次改写。</p>
+      </div>
+      <div class="card reveal" data-d="2">
+        <div class="card-h"><span class="tag gold">文案库</span></div>
+        <h3 class="card-t">一句可用的引证</h3>
+        <p class="card-p" style="font-family:var(--serif);color:var(--ivory)">「麻雀亦叶子之一……始于浙之宁波，其后不胫而走，遂遍南北。」<br><span style="font-family:var(--sans);font-size:11.5px;color:var(--ivory-3)">徐珂《清稗类钞》</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="wrap" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;width:100%">
+  <span>天一阁 · 数智幻境 ／ demo-04 · 寰宇四方</span>
+  <span>示意性航线图 · 不含地理边界数据</span>
+</div></footer>
+
+<script src="assets/store.js"></script>
+<script>
+(function(){
+  /* 背景点阵 */
+  var dots = document.getElementById('dots'), s = '';
+  for(var y=24;y<560;y+=26){
+    for(var x=24;x<1000;x+=26){
+      s += '<circle cx="'+x+'" cy="'+y+'" r=".9" fill="#F3EADA"/>';
+    }
+  }
+  dots.innerHTML = s;
+
+  var DATA = {
+    home:{
+      no:'起点 · ORIGIN', t:'江厦码头', y:'1844 年 · 宁波开埠',
+      p:'宁波被辟为五口通商口岸之一，江厦一带海轮云集。各地商贾在这里学会麻将，再带回京津沪与沿海各省；也在这里，麻将第一次被外国人看见——英国领事夏福礼就是牌桌上的常客。',
+      e:'「走遍天下，不如宁波江厦。」—— 近代宁波俗谚'
+    },
+    jp:{
+      no:'航线 01 · EAST', t:'东渡日本', y:'1909 年 · 名川彦作',
+      p:'日本教师名川彦作把麻将带回日本。百余年间，它完成了从「赌具」到「竞技」的转化：有了职业联赛、有了段位、有了统一的规则文本。同一副牌，在两种社会里长成了两种东西。',
+      e:'物证 · 日本竹骨牌，风牌另标 E / S / W / N（实拍 S05）'
+    },
+    us:{
+      no:'航线 02 · WEST', t:'西行欧美', y:'1879 年 · 戈鲲化',
+      p:'戈鲲化曾在宁波英国领事馆工作十余年，与陈鱼门相交甚深，亦精通牌术。光绪五年（1879），即陈鱼门逝世的次年，他受聘赴哈佛大学任教，成为登上哈佛讲台的第一位中国籍教授——麻将随他进入美国知识阶层。',
+      e:'物证 · 西方麻将牌，加注数字与英文色名（网络图 11）'
+    },
+    eu:{
+      no:'航线 03 · EUROPE', t:'英伦与领事馆', y:'19 世纪下半叶',
+      p:'陈列馆平和堂的「三缺一」铜像里，坐在陈鱼门右侧的正是英国驻宁波领事夏福礼。牌桌是当时中外商人少数可以平等坐下来的地方——文化常常不是被「输出」的，是被一起玩出去的。',
+      e:'空间物证 · 平和堂「三缺一」青铜群像，独留一个空位给观众'
+    },
+    sea:{
+      no:'航线 04 · SOUTH', t:'南下南洋', y:'19 世纪末起',
+      p:'闽粤与宁波商人沿海南下，麻将进入新加坡、马六甲一带的华人社群，并与当地牌具工艺结合，出现贝壳、赛璐璐等材质。传播不是一条射线，而是一张越织越密的网。',
+      e:'待补素材 · 南洋牌具实物或当地牌局影像（见素材清单 N03）'
+    }
+  };
+  var COLOR = { home:'#A13A2C', jp:'#C4573F', us:'#5C7A63', eu:'#9A7D4A', sea:'#7E8B7A' };
+
+  var map = document.getElementById('map');
+  var traveler = document.getElementById('traveler');
+  var rafId = null, playing = false;
+
+  function setActive(k){
+    document.querySelectorAll('.node').forEach(function(n){ n.classList.toggle('on', n.dataset.k === k); });
+    document.querySelectorAll('.route').forEach(function(r){ r.classList.toggle('on', r.id === 'r-' + k); });
+    document.querySelectorAll('#tabs button[data-k]').forEach(function(b){
+      var on = b.dataset.k === k;
+      b.classList.toggle('on', on);
+      b.style.borderColor = on ? 'rgba(196,87,63,.6)' : '';
+      b.style.background = on ? 'rgba(161,58,44,.14)' : '';
+      b.style.color = on ? 'var(--ivory)' : '';
+    });
+    var d = DATA[k];
+    document.getElementById('iNo').textContent = d.no;
+    document.getElementById('iT').textContent = d.t;
+    document.getElementById('iY').textContent = d.y;
+    document.getElementById('iP').textContent = d.p;
+    document.getElementById('iE').textContent = d.e;
+
+    if(k === 'home'){ traveler.setAttribute('opacity', 0); return; }
+    var path = document.getElementById('r-' + k);
+    var len = path.getTotalLength();
+    path.style.transition = 'none';
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    void path.getBoundingClientRect();
+    path.style.transition = 'stroke-dashoffset 1.5s cubic-bezier(.25,.7,.2,1), opacity .5s, stroke-width .5s';
+    path.style.strokeDashoffset = 0;
+
+    cancelAnimationFrame(rafId);
+    var t0 = performance.now(), DUR = 1600;
+    (function run(now){
+      var p = Math.min(1, (now - t0) / DUR);
+      var pt = path.getPointAtLength(len * p);
+      traveler.setAttribute('cx', pt.x);
+      traveler.setAttribute('cy', pt.y);
+      traveler.setAttribute('opacity', p < 1 ? .95 : 0);
+      if(p < 1) rafId = requestAnimationFrame(run);
+    })(t0);
+  }
+
+  map.addEventListener('click', function(e){
+    var n = e.target.closest('.node'); if(!n) return;
+    setActive(n.dataset.k);
+    TY.track('传·寰宇航线','点击落点',{k:n.dataset.k});
+  });
+
+  document.getElementById('tabs').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-k]'); if(!b) return;
+    setActive(b.dataset.k);
+    TY.track('传·寰宇航线','切换航线',{k:b.dataset.k});
+  });
+
+  document.getElementById('playAll').addEventListener('click', function(){
+    if(playing) return;
+    playing = true;
+    var seq = ['jp','us','eu','sea'], i = 0;
+    var btn = this; btn.textContent = '播放中…';
+    (function next(){
+      if(i >= seq.length){ playing = false; btn.textContent = '▶ 依次播放'; setActive('home'); return; }
+      setActive(seq[i++]);
+      setTimeout(next, 2100);
+    })();
+    TY.track('传·寰宇航线','依次播放');
+  });
+
+  setActive('home');
+  TY.track('传·寰宇航线','进入页面');
+})();
+</script>
+</body>
+</html>
